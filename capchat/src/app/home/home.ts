@@ -1,11 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { ChallengeService } from '../services/challenge';
+import { Challenge } from '../models/models';
 
 @Component({
   selector: 'app-home',
   imports: [],
+  standalone: true,
   templateUrl: './home.html',
   styleUrl: './home.scss'
 })
-export class Home {
+export class Home implements OnInit{
+  private challenge : Challenge[] = [];
+  
+  constructor(private challengeService : ChallengeService){}
 
+  async ngOnInit(): Promise<void> {
+    
+  }
 }

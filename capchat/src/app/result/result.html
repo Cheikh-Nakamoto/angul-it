@@ -1,0 +1,367 @@
+<!-- result.component.html -->
+<div class="result-container">
+  <!-- Header -->
+  <header class="result-header">
+    <div class="header-content">
+      <div class="logo">
+        <h1 class="logo-text">Angul-It</h1>
+        <span class="logo-subtitle">Résultats du défi</span>
+      </div>
+      
+      <!-- Barre de progression complète -->
+      <div class="progress-bar">
+        <div class="progress-step completed">1</div>
+        <div class="progress-line completed"></div>
+        <div class="progress-step completed">2</div>
+        <div class="progress-line completed"></div>
+        <div class="progress-step completed">3</div>
+        <div class="progress-line completed"></div>
+        <div class="progress-step completed">4</div>
+        <div class="progress-line completed"></div>
+        <div class="progress-step completed">5</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenu principal -->
+  <main class="result-main">
+    <div class="result-content">
+      <!-- Hero des résultats -->
+      <div class="result-hero">
+        <div class="success-animation">
+          <div class="success-circle">
+            <div class="success-icon">🎉</div>
+          </div>
+          <div class="confetti confetti-1">🎊</div>
+          <div class="confetti confetti-2">✨</div>
+          <div class="confetti confetti-3">🌟</div>
+          <div class="confetti confetti-4">🎈</div>
+        </div>
+        
+        <h1 class="result-title">
+          <span class="success-text">Félicitations !</span>
+          <span class="subtitle">Vous avez terminé tous les défis</span>
+        </h1>
+      </div>
+
+      <!-- Statistiques globales -->
+      <div class="stats-section">
+        <div class="stats-grid">
+          <div class="stat-card primary">
+            <div class="stat-icon">🏆</div>
+            <div class="stat-content">
+              <div class="stat-number">87%</div>
+              <div class="stat-label">Score global</div>
+            </div>
+          </div>
+          
+          <div class="stat-card success">
+            <div class="stat-icon">⏱️</div>
+            <div class="stat-content">
+              <div class="stat-number">4:23</div>
+              <div class="stat-label">Temps total</div>
+            </div>
+          </div>
+          
+          <div class="stat-card warning">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-content">
+              <div class="stat-number">4/5</div>
+              <div class="stat-label">Défis réussis</div>
+            </div>
+          </div>
+          
+          <div class="stat-card info">
+            <div class="stat-icon">🔥</div>
+            <div class="stat-content">
+              <div class="stat-number">3</div>
+              <div class="stat-label">Série parfaite</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Détail des performances -->
+      <div class="performance-section">
+        <h2 class="section-title">Détail de vos performances</h2>
+        
+        <div class="challenges-list">
+          <!-- Défi 1 -->
+          <div class="challenge-item success">
+            <div class="challenge-header">
+              <div class="challenge-info">
+                <div class="challenge-number">1</div>
+                <div class="challenge-details">
+                  <h3 class="challenge-name">Reconnaissance d'images</h3>
+                  <p class="challenge-desc">Sélectionner toutes les voitures</p>
+                </div>
+              </div>
+              <div class="challenge-result">
+                <div class="result-badge success">Réussi</div>
+                <div class="challenge-score">100%</div>
+              </div>
+            </div>
+            <div class="challenge-stats">
+              <div class="stat-item">
+                <span class="stat-icon">⏱️</span>
+                <span class="stat-text">45s</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon">🎯</span>
+                <span class="stat-text">3/3 correctes</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Défi 2 -->
+          <div class="challenge-item success">
+            <div class="challenge-header">
+              <div class="challenge-info">
+                <div class="challenge-number">2</div>
+                <div class="challenge-details">
+                  <h3 class="challenge-name">Problème mathématique</h3>
+                  <p class="challenge-desc">Résoudre: 15 + 27 = ?</p>
+                </div>
+              </div>
+              <div class="challenge-result">
+                <div class="result-badge success">Réussi</div>
+                <div class="challenge-score">100%</div>
+              </div>
+            </div>
+            <div class="challenge-stats">
+              <div class="stat-item">
+                <span class="stat-icon">⏱️</span>
+                <span class="stat-text">12s</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon">✅</span>
+                <span class="stat-text">Première tentative</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Défi 3 -->
+          <div class="challenge-item success">
+            <div class="challenge-header">
+              <div class="challenge-info">
+                <div class="challenge-number">3</div>
+                <div class="challenge-details">
+                  <h3 class="challenge-name">Saisie de texte</h3>
+                  <p class="challenge-desc">Déchiffrer le texte déformé</p>
+                </div>
+              </div>
+              <div class="challenge-result">
+                <div class="result-badge success">Réussi</div>
+                <div class="challenge-score">95%</div>
+              </div>
+            </div>
+            <div class="challenge-stats">
+              <div class="stat-item">
+                <span class="stat-icon">⏱️</span>
+                <span class="stat-text">1:23</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon">🔤</span>
+                <span class="stat-text">1 erreur mineure</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Défi 4 -->
+          <div class="challenge-item success">
+            <div class="challenge-header">
+              <div class="challenge-info">
+                <div class="challenge-number">4</div>
+                <div class="challenge-details">
+                  <h3 class="challenge-name">Puzzle logique</h3>
+                  <p class="challenge-desc">Compléter la séquence</p>
+                </div>
+              </div>
+              <div class="challenge-result">
+                <div class="result-badge success">Réussi</div>
+                <div class="challenge-score">100%</div>
+              </div>
+            </div>
+            <div class="challenge-stats">
+              <div class="stat-item">
+                <span class="stat-icon">⏱️</span>
+                <span class="stat-text">1:45</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon">🧩</span>
+                <span class="stat-text">Solution optimale</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Défi 5 -->
+          <div class="challenge-item failed">
+            <div class="challenge-header">
+              <div class="challenge-info">
+                <div class="challenge-number">5</div>
+                <div class="challenge-details">
+                  <h3 class="challenge-name">Défi combiné</h3>
+                  <p class="challenge-desc">Images + calcul mental</p>
+                </div>
+              </div>
+              <div class="challenge-result">
+                <div class="result-badge failed">Échoué</div>
+                <div class="challenge-score">60%</div>
+              </div>
+            </div>
+            <div class="challenge-stats">
+              <div class="stat-item">
+                <span class="stat-icon">⏱️</span>
+                <span class="stat-text">2:18</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon">❌</span>
+                <span class="stat-text">2/5 correctes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analyse et conseils -->
+      <div class="analysis-section">
+        <h2 class="section-title">Analyse de vos résultats</h2>
+        
+        <div class="analysis-grid">
+          <div class="analysis-card strengths">
+            <div class="analysis-header">
+              <div class="analysis-icon">💪</div>
+              <h3 class="analysis-title">Points forts</h3>
+            </div>
+            <ul class="analysis-list">
+              <li>Excellente rapidité sur les calculs simples</li>
+              <li>Très bonne reconnaissance visuelle</li>
+              <li>Concentration maintenue durant tout le test</li>
+            </ul>
+          </div>
+          
+          <div class="analysis-card improvements">
+            <div class="analysis-header">
+              <div class="analysis-icon">📈</div>
+              <h3 class="analysis-title">Axes d'amélioration</h3>
+            </div>
+            <ul class="analysis-list">
+              <li>Attention aux défis combinés complexes</li>
+              <li>Prendre plus de temps pour vérifier</li>
+              <li>Gérer le stress sur les derniers défis</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparaison -->
+      <div class="comparison-section">
+        <h2 class="section-title">Comparaison avec les autres utilisateurs</h2>
+        
+        <div class="comparison-chart">
+          <div class="chart-header">
+            <h3 class="chart-title">Votre score vs Moyenne générale</h3>
+          </div>
+          <div class="chart-content">
+            <div class="score-comparison">
+              <div class="score-bar">
+                <div class="score-label">Votre score</div>
+                <div class="bar-container">
+                  <div class="bar user-bar" style="width: 87%">87%</div>
+                </div>
+              </div>
+              <div class="score-bar">
+                <div class="score-label">Moyenne générale</div>
+                <div class="bar-container">
+                  <div class="bar average-bar" style="width: 73%">73%</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="ranking-info">
+              <div class="ranking-card">
+                <div class="ranking-number">Top 25%</div>
+                <div class="ranking-text">des utilisateurs</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Badge et récompenses -->
+      <div class="rewards-section">
+        <h2 class="section-title">Récompenses obtenues</h2>
+        
+        <div class="badges-grid">
+          <div class="badge-item earned">
+            <div class="badge-icon">🏁</div>
+            <div class="badge-info">
+              <h4 class="badge-name">Finisseur</h4>
+              <p class="badge-desc">Complété tous les défis</p>
+            </div>
+          </div>
+          
+          <div class="badge-item earned">
+            <div class="badge-icon">⚡</div>
+            <div class="badge-info">
+              <h4 class="badge-name">Éclair</h4>
+              <p class="badge-desc">Défis 1-2 en moins de 1 minute</p>
+            </div>
+          </div>
+          
+          <div class="badge-item earned">
+            <div class="badge-icon">🎯</div>
+            <div class="badge-info">
+              <h4 class="badge-name">Précision</h4>
+              <p class="badge-desc">3 défis parfaits consécutifs</p>
+            </div>
+          </div>
+          
+          <div class="badge-item locked">
+            <div class="badge-icon">👑</div>
+            <div class="badge-info">
+              <h4 class="badge-name">Maître</h4>
+              <p class="badge-desc">Score parfait sur tous les défis</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions finales -->
+      <div class="final-actions">
+        <div class="action-buttons">
+          <button class="secondary-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M8 17l4 4 4-4M12 1v20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Télécharger le rapport
+          </button>
+          
+          <button class="secondary-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Partager mes résultats
+          </button>
+          
+          <button class="primary-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M3 12l9-9 9 9M12 3v18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Refaire le défi
+          </button>
+        </div>
+        
+        <div class="back-home">
+          <button class="home-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Retour à l'accueil
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+

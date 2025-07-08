@@ -4,6 +4,8 @@
   "compileOnSave": false,
   "compilerOptions": {
     "strict": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
@@ -30,5 +32,5 @@
     {
       "path": "./tsconfig.spec.json"
     }
-  ]
+  ],
 }

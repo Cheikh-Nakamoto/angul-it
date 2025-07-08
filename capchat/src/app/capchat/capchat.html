@@ -1,0 +1,128 @@
+<!-- captcha.component.html -->
+<div class="captcha-container">
+    <!-- Header avec progression -->
+    <header class="captcha-header">
+        <div class="header-content">
+            <div class="logo">
+                <h1 class="logo-text">Angul-It</h1>
+                <span class="logo-subtitle">Défi en cours</span>
+            </div>
+
+            <!-- Barre de progression -->
+            <div class="progress-bar">
+                <div class="progress-step completed">1</div>
+                <div class="progress-line completed"></div>
+                <div class="progress-step completed">2</div>
+                <div class="progress-line"></div>
+                <div class="progress-step current">3</div>
+                <div class="progress-line"></div>
+                <div class="progress-step">4</div>
+                <div class="progress-line"></div>
+                <div class="progress-step">5</div>
+            </div>
+
+            <!-- Bouton retour -->
+            <button class="back-button">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                Retour
+            </button>
+        </div>
+    </header>
+
+    <!-- Contenu principal -->
+    <main class="captcha-main">
+        <div class="captcha-content">
+            <!-- Instructions -->
+            <div class="instructions-card">
+                <div class="challenge-info">
+                    <span class="challenge-number">Défi 3/5</span>
+                    <h2 class="challenge-title">Sélectionnez toutes les images contenant des <span
+                            class="highlight">voitures</span></h2>
+                    <p class="challenge-description">Cliquez sur chaque image qui contient une voiture. Vous pouvez
+                        annuler votre sélection en cliquant à nouveau.</p>
+                </div>
+
+                <!-- Timer -->
+                <div class="timer">
+                    <div class="timer-icon">⏱️</div>
+                    <span class="timer-text">2:45</span>
+                </div>
+            </div>
+
+            <!-- Grille d'images -->
+            <div class="image-grid-container">
+                @for (item of challengesList; track $index) {
+                @if(item.type == "image_selection") {
+                    <div class="image-grid">
+                    @for (img of item.images; track $index) {
+                            <div class="image-item" data-contains="car">
+                                <div class="image-placeholder">
+                                    <div class="image-content"><img src="{{img.url}}" alt=""></div>
+                                </div>
+                                <div class="selection-overlay">
+                                    <div class="checkmark">✓</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                }@else {
+                <div class="image-grid">
+                    <div class="image-item" data-contains="car">
+                        <div class="image-placeholder">
+                            {{item.question}}
+                        </div>
+                        <div class="selection-overlay">
+                            <div class="checkmark">✓</div>
+                        </div>
+                    </div>
+                </div>
+                }
+
+                }
+
+
+                <!-- Compteur de sélections -->
+                <div class="selection-counter">
+                    <span class="counter-text">Images sélectionnées: <strong>0/3</strong></span>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="action-buttons">
+                <button class="secondary-button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 12l9-9 9 9M12 3v18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                    Recharger les images
+                </button>
+
+                <button class="primary-button">
+                    Vérifier ma sélection
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M5 12l5 5L20 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Aide -->
+            <div class="help-section">
+                <button class="help-button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                        <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                    Besoin d'aide ?
+                </button>
+            </div>
+        </div>
+    </main>
+</div>
