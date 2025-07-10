@@ -1,8 +1,8 @@
 // src/app/models/challenge.model.ts
 
 export interface ChallengeBase {
-  id: number;
-  type: ChallengeType;
+  id?: number;
+  type?: ChallengeType;
   question?: string;
   difficulty?: 'easy' | 'medium' | 'hard';
   animation?: string;
@@ -15,14 +15,16 @@ export type ChallengeType =
   | 'boolean';
 
 export interface ImageSelectionChallenge extends ChallengeBase {
-  type: 'image_selection';
-  images: DetailsImg[];
+  type?: 'image_selection';
+  images?: DetailsImg[];
+  correctPos?:number[]
 }
 
 export interface DetailsImg {
-  url: string;
-  alt: string;
-  isCorrect: boolean;
+  url?: string;
+  alt?: string;
+  isCorrect?: boolean;
+  item?:string
 }
 
 // export interface TextInputChallenge extends ChallengeBase {
@@ -33,15 +35,7 @@ export interface DetailsImg {
 // }
 
 export interface MultipleChoiceChallenge extends ChallengeBase {
-  type: 'multiple';
-  correct_answer: string;
-  incorrect_answers: string;
-  category: string;
-}
-
-
-export interface TrueFalseChallenge extends ChallengeBase {
-  type: 'boolean';
+  type: 'multiple'| 'boolean';
   correct_answer: string;
   incorrect_answers: string;
   category: string;
@@ -49,5 +43,4 @@ export interface TrueFalseChallenge extends ChallengeBase {
 
 export type Challenge =
   | ImageSelectionChallenge
-  | MultipleChoiceChallenge
-  | TrueFalseChallenge;
+  | MultipleChoiceChallenge;

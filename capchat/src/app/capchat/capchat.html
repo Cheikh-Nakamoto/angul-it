@@ -56,29 +56,68 @@
             <div class="image-grid-container">
                 @for (item of challengesList; track $index) {
                 @if(item.type == "image_selection") {
-                    <div class="image-grid">
-                    @for (img of item.images; track $index) {
-                            <div class="image-item" data-contains="car">
-                                <div class="image-placeholder">
-                                    <div class="image-content"><img src="{{img.url}}" alt=""></div>
-                                </div>
-                                <div class="selection-overlay">
-                                    <div class="checkmark">✓</div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-
-                }@else {
                 <div class="image-grid">
+                    @for (img of item.images; track $index) {
                     <div class="image-item" data-contains="car">
                         <div class="image-placeholder">
-                            {{item.question}}
+                            <div class="image-content"><img src="{{img.url}}" alt=""></div>
                         </div>
                         <div class="selection-overlay">
                             <div class="checkmark">✓</div>
                         </div>
                     </div>
+                    }
+                </div>
+
+                }@else if (item.type === 'multiple' || item.type === 'boolean') {
+                <div class="question-container">
+                    <!-- En-tête de la question -->
+                    <div class="question-header">
+                        <div class="question-icon">?</div>
+                        <div class="question-meta">
+                            <div class="question-category">{{item.category}}</div>
+                            <div class="question-difficulty {{item.difficulty}}">{{item.difficulty}}</div>
+                        </div>
+                    </div>
+
+                    <!-- Texte de la question -->
+                    <div class="question-text">
+                        {{item.question}}
+                    </div>
+
+                    <!-- Indicateur de réponse -->
+                    <!-- <div class="answer-indicator" [class.has-answer]="selectedAnswer">
+                        <span *ngIf="!selectedAnswer">Sélectionnez une réponse</span>
+                        <span *ngIf="selectedAnswer">Réponse sélectionnée: <span
+                                class="selected-answer">{{selectedAnswer}}</span></span>
+                    </div> -->
+
+                    <!-- Réponses pour les questions multiples -->
+                    <div class="answers-grid">
+                        @for (answer of item.incorrect_answers; track $index) {
+                            <div class="answer-option" (click)="selectanswer(answer)">
+                                <div id="{{answer}}" class="answer-radio"></div>
+                                <div class="answer-text">{{answer}}</div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Réponses pour les questions boolean
+                     @if (item.type === 'boolean') {
+                         <div class="boolean-answers" >
+                             <div class="answer-option true-option"
+                                 >
+                                 <div class="answer-radio"></div>
+                                 <div class="answer-text">Vrai</div>
+                             </div>
+                             <div class="answer-option false-option"
+                                 >
+                                 <div class="answer-radio"></div>
+                                 <div class="answer-text">Faux</div>
+                             </div>
+                         </div>
+
+                     } -->
                 </div>
                 }
 
