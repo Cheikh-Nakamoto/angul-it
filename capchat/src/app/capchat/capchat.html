@@ -58,7 +58,7 @@
                 @if(item.type == "image_selection") {
                 <div class="image-grid">
                     @for (img of item.images; track $index) {
-                    <div class="image-item" data-contains="car">
+                    <div class="image-item" id="{{$index}}" (click)="selectanswer($index,'image_selection')" data-contains="car">
                         <div class="image-placeholder">
                             <div class="image-content"><img src="{{img.url}}" alt=""></div>
                         </div>
@@ -95,7 +95,7 @@
                     <!-- Réponses pour les questions multiples -->
                     <div class="answers-grid">
                         @for (answer of item.incorrect_answers; track $index) {
-                            <div class="answer-option" (click)="selectanswer(answer)">
+                            <div class="answer-option" (click)="selectanswer(answer, 'multiple')">
                                 <div id="{{answer}}" class="answer-radio"></div>
                                 <div class="answer-text">{{answer}}</div>
                             </div>

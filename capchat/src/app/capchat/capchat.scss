@@ -378,6 +378,18 @@ $gray-900: #111827;
   }
 }
 
+
+.selected-img {
+  .selection-overlay {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .image-placeholder {
+    border-color: $success-color;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  }
+}
 // Boutons d'action
 .action-buttons {
   display: flex;
