@@ -6,6 +6,7 @@ export interface ChallengeBase {
   question?: string;
   difficulty?: 'easy' | 'medium' | 'hard';
   animation?: string;
+  isSuccess?:boolean
   testId?: string; // Pour les tests unitaires
 }
 
@@ -37,7 +38,7 @@ export interface DetailsImg {
 export interface MultipleChoiceChallenge extends ChallengeBase {
   type: 'multiple'| 'boolean';
   correct_answer: string;
-  incorrect_answers: string;
+  incorrect_answers: string[];
   category: string;
 }
 

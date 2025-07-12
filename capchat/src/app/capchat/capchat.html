@@ -8,21 +8,23 @@
                 <span class="logo-subtitle">Défi en cours</span>
             </div>
 
-            <!-- Barre de progression -->
+            <!-- Barre de progression dynamique -->
             <div class="progress-bar">
-                <div class="progress-step completed">1</div>
-                <div class="progress-line completed"></div>
-                <div class="progress-step completed">2</div>
-                <div class="progress-line"></div>
-                <div class="progress-step current">3</div>
-                <div class="progress-line"></div>
-                <div class="progress-step">4</div>
-                <div class="progress-line"></div>
-                <div class="progress-step">5</div>
+                @for (step of [1,2,3,4,5,6,7,8,9,10]; track step) {
+                    <div class="progress-step" 
+                         [class.completed]="step < currentStep()"
+                         [class.current]="step === currentStep()">
+                        {{step}}
+                    </div>
+                    @if (step < 5) {
+                        <div class="progress-line" 
+                             [class.completed]="step < currentStep()"></div>
+                    }
+                }
             </div>
 
             <!-- Bouton retour -->
-            <button class="back-button">
+            <button class="back-button" (click)="previousChallenge()">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                     <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round" />
@@ -38,29 +40,42 @@
             <!-- Instructions -->
             <div class="instructions-card">
                 <div class="challenge-info">
-                    <span class="challenge-number">Défi 3/5</span>
-                    <h2 class="challenge-title">Sélectionnez toutes les images contenant des <span
-                            class="highlight">voitures</span></h2>
-                    <p class="challenge-description">Cliquez sur chaque image qui contient une voiture. Vous pouvez
-                        annuler votre sélection en cliquant à nouveau.</p>
+                    <span class="challenge-number">Défi {{currentStep()}}/{{totalSteps()}}</span>
+                    <h2 class="challenge-title">
+                        @if (currentChallenge().type === 'image_selection') {
+                            Sélectionnez toutes les images contenant des <span class="highlight">{{getImageTarget()}}</span>
+                        } @else {
+                            {{getQuestionText()}}
+                        }
+                    </h2>
+                    <p class="challenge-description">
+                        @if (currentChallenge().type === 'image_selection') {
+                            Cliquez sur chaque image qui contient l'élément recherché. Vous pouvez annuler votre sélection en cliquant à nouveau.
+                        } @else {
+                            Sélectionnez la bonne réponse parmi les options proposées.
+                        }
+                    </p>
                 </div>
 
                 <!-- Timer -->
                 <div class="timer">
                     <div class="timer-icon">⏱️</div>
-                    <span class="timer-text">2:45</span>
+                    <span class="timer-text">{{timeRemaining()}}</span>
                 </div>
             </div>
 
             <!-- Grille d'images -->
             <div class="image-grid-container">
-                @for (item of challengesList; track $index) {
-                @if(item.type == "image_selection") {
+                @if(currentChallenge().type === "image_selection") {
                 <div class="image-grid">
-                    @for (img of item.images; track $index) {
-                    <div class="image-item" id="{{$index}}" (click)="selectanswer($index,'image_selection')" data-contains="car">
+                    @for (img of currentImageChallenge!.images ; track $index) {
+                    <div class="image-item" 
+                         id="{{$index}}" 
+                         (click)="selectAnswer($index,'image_selection')" >
                         <div class="image-placeholder">
-                            <div class="image-content"><img src="{{img.url}}" alt=""></div>
+                            <div class="image-content">
+                                <img src="{{img.url}}" alt="{{img.alt || 'Image ' + ($index + 1)}}">
+                            </div>
                         </div>
                         <div class="selection-overlay">
                             <div class="checkmark">✓</div>
@@ -69,78 +84,60 @@
                     }
                 </div>
 
-                }@else if (item.type === 'multiple' || item.type === 'boolean') {
+                <!-- Compteur de sélections -->
+                <div class="selection-counter">
+                    <span class="counter-text">
+                        Images sélectionnées: 
+                        <strong>{{selectedImageCount()}}/{{getMaxSelections()}}</strong>
+                    </span>
+                </div>
+
+                }@else if (currentChallenge().type === 'multiple' || currentChallenge().type === 'boolean') {
                 <div class="question-container">
                     <!-- En-tête de la question -->
                     <div class="question-header">
                         <div class="question-icon">?</div>
                         <div class="question-meta">
-                            <div class="question-category">{{item.category}}</div>
-                            <div class="question-difficulty {{item.difficulty}}">{{item.difficulty}}</div>
+                            <div class="question-category">{{getCategoryText()}}</div>
+                            <div class="question-difficulty {{getDifficultyText()}}">
+                                {{getDifficultyText()}}
+                            </div>
                         </div>
                     </div>
 
                     <!-- Texte de la question -->
                     <div class="question-text">
-                        {{item.question}}
+                        {{getQuestionText()}}
                     </div>
 
                     <!-- Indicateur de réponse -->
-                    <!-- <div class="answer-indicator" [class.has-answer]="selectedAnswer">
-                        <span *ngIf="!selectedAnswer">Sélectionnez une réponse</span>
-                        <span *ngIf="selectedAnswer">Réponse sélectionnée: <span
-                                class="selected-answer">{{selectedAnswer}}</span></span>
-                    </div> -->
+                    <div class="answer-indicator" [class.has-answer]="selectedAnswer() !== null">
+                        @if (selectedAnswer() === null) {
+                            <span>Sélectionnez une réponse</span>
+                        } @else {
+                            <span>Réponse sélectionnée: 
+                                <span class="selected-answer">{{selectedAnswer()}}</span>
+                            </span>
+                        }
+                    </div>
 
-                    <!-- Réponses pour les questions multiples -->
+                    <!-- Réponses pour les questions multiples ET boolean -->
                     <div class="answers-grid">
-                        @for (answer of item.incorrect_answers; track $index) {
-                            <div class="answer-option" (click)="selectanswer(answer, 'multiple')">
+                        @for (answer of getAnswerOptions(); track $index) {
+                            <div class="answer-option" (click)="selectAnswer(answer, currentChallenge().type || 'multiple')">
                                 <div id="{{answer}}" class="answer-radio"></div>
                                 <div class="answer-text">{{answer}}</div>
                             </div>
                         }
                     </div>
-
-                    <!-- Réponses pour les questions boolean
-                     @if (item.type === 'boolean') {
-                         <div class="boolean-answers" >
-                             <div class="answer-option true-option"
-                                 >
-                                 <div class="answer-radio"></div>
-                                 <div class="answer-text">Vrai</div>
-                             </div>
-                             <div class="answer-option false-option"
-                                 >
-                                 <div class="answer-radio"></div>
-                                 <div class="answer-text">Faux</div>
-                             </div>
-                         </div>
-
-                     } -->
                 </div>
                 }
-
-                }
-
-
-                <!-- Compteur de sélections -->
-                <div class="selection-counter">
-                    <span class="counter-text">Images sélectionnées: <strong>0/3</strong></span>
-                </div>
             </div>
 
             <!-- Actions -->
             <div class="action-buttons">
-                <button class="secondary-button">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M3 12l9-9 9 9M12 3v18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                    </svg>
-                    Recharger les images
-                </button>
-
-                <button class="primary-button">
+                <button class="primary-button" 
+                        (click)="verify_select()">
                     Vérifier ma sélection
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                         <path d="M5 12l5 5L20 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"

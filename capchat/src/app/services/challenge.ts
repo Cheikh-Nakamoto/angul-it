@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Challenge, ChallengeType, DetailsImg, ImageSelectionChallenge } from '../models/models';
-import {  Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -9,13 +9,14 @@ import {  Observable } from 'rxjs';
 export class ChallengeService {
   private challengesCache$?: Observable<Challenge[]>;
   challenges: Challenge[] = [];
+  searchItem: string = "";
   private questionLink: string = "https://opentdb.com/api.php?amount=10&category=19";
   private readonly UNSPLASH_API_BASE_URL: string = "https://api.unsplash.com/search/photos/";
   private readonly UNSPLASH_CLIENT_ID: string = "LQOBym_YOgyZL1F8oaT9jZtEdx2ginp1036APyX96fs";
   private readonly IMAGE_SEARCH_TERMS: string[] = ["dog", "bus", "cat", "car"];
   private CurrentChallengeId: number = 0;
 
-  constructor(private sanitizer: DomSanitizer) {}
+  constructor(private sanitizer: DomSanitizer) { }
 
   /**
    * Décode les entités HTML en utilisant DomSanitizer
@@ -39,7 +40,7 @@ export class ChallengeService {
       ...questionData,
       question: this.decodeHtmlEntities(questionData.question),
       correct_answer: this.decodeHtmlEntities(questionData.correct_answer),
-      incorrect_answers: questionData.incorrect_answers.map((answer: string) => 
+      incorrect_answers: questionData.incorrect_answers.map((answer: string) =>
         this.decodeHtmlEntities(answer)
       ),
       category: this.decodeHtmlEntities(questionData.category)
@@ -50,14 +51,15 @@ export class ChallengeService {
     try {
       const res = await fetch(this.questionLink.toString());
       const data = await res.json();
-      
+
       if (data != undefined && data["results"] != undefined) {
         // Nettoyer toutes les questions avant de les traiter
-        const cleanedResults = data["results"].map((question: any) => 
+        const cleanedResults = data["results"].map((question: any) =>
           this.cleanQuestionData(question)
         );
-        
+
         const challengeQuestion = this.getSingleRandomChallengeQuestion(cleanedResults);
+        console.log(challengeQuestion)
         this.challenges.push(challengeQuestion);
       }
     } catch (error) {
@@ -69,7 +71,17 @@ export class ChallengeService {
     let challenge = data[Math.floor(Math.random() * data.length)];
     // Correction: ajouter la bonne réponse aux réponses incorrectes
     challenge.incorrect_answers.push(challenge.correct_answer);
+    challenge.incorrect_answers = this.shuffleArray(challenge.incorrect_answers);
     return challenge;
+  }
+  
+  private shuffleArray<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
   }
 
   async getRandomChallenge(): Promise<Challenge> {
@@ -105,8 +117,8 @@ export class ChallengeService {
 
     const randomIndex = Math.floor(Math.random() * this.IMAGE_SEARCH_TERMS.length);
     const searchTerm = this.IMAGE_SEARCH_TERMS[randomIndex];
-    console.log(searchTerm);
-    
+    this.searchItem = searchTerm
+
     // This function needs implementation to fetch image challenges
     // For now, returning an empty array to satisfy the return type
     for (let index = 0; index < 3; index++) {
