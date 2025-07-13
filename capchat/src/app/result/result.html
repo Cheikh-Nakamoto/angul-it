@@ -10,15 +10,12 @@
       
       <!-- Barre de progression complète -->
       <div class="progress-bar">
-        <div class="progress-step completed">1</div>
-        <div class="progress-line completed"></div>
-        <div class="progress-step completed">2</div>
-        <div class="progress-line completed"></div>
-        <div class="progress-step completed">3</div>
-        <div class="progress-line completed"></div>
-        <div class="progress-step completed">4</div>
-        <div class="progress-line completed"></div>
-        <div class="progress-step completed">5</div>
+        @for (step of [1,2,3,4,5]; track step) {
+          <div class="progress-step completed">{{ step }}</div>
+          @if (step < 5) {
+            <div class="progress-line completed"></div>
+          }
+        }
       </div>
     </div>
   </header>
@@ -50,7 +47,7 @@
           <div class="stat-card primary">
             <div class="stat-icon">🏆</div>
             <div class="stat-content">
-              <div class="stat-number">87%</div>
+              <div class="stat-number">{{ globalStats().globalScore }}%</div>
               <div class="stat-label">Score global</div>
             </div>
           </div>
@@ -58,7 +55,7 @@
           <div class="stat-card success">
             <div class="stat-icon">⏱️</div>
             <div class="stat-content">
-              <div class="stat-number">4:23</div>
+              <div class="stat-number">{{ globalStats().totalTime }}</div>
               <div class="stat-label">Temps total</div>
             </div>
           </div>
@@ -66,7 +63,7 @@
           <div class="stat-card warning">
             <div class="stat-icon">🎯</div>
             <div class="stat-content">
-              <div class="stat-number">4/5</div>
+              <div class="stat-number">{{ globalStats().successfulChallenges }}/{{ globalStats().totalChallenges }}</div>
               <div class="stat-label">Défis réussis</div>
             </div>
           </div>
@@ -74,7 +71,7 @@
           <div class="stat-card info">
             <div class="stat-icon">🔥</div>
             <div class="stat-content">
-              <div class="stat-number">3</div>
+              <div class="stat-number">{{ globalStats().perfectStreak }}</div>
               <div class="stat-label">Série parfaite</div>
             </div>
           </div>
@@ -86,140 +83,35 @@
         <h2 class="section-title">Détail de vos performances</h2>
         
         <div class="challenges-list">
-          <!-- Défi 1 -->
-          <div class="challenge-item success">
-            <div class="challenge-header">
-              <div class="challenge-info">
-                <div class="challenge-number">1</div>
-                <div class="challenge-details">
-                  <h3 class="challenge-name">Reconnaissance d'images</h3>
-                  <p class="challenge-desc">Sélectionner toutes les voitures</p>
+          @for (result of challengeResults(); track result.challenge.id) {
+            <div [class]="getChallengeItemClass(result.isSuccess)">
+              <div class="challenge-header">
+                <div class="challenge-info">
+                  <div class="challenge-number">{{ $index + 1 }}</div>
+                  <div class="challenge-details">
+                    <h3 class="challenge-name">{{ getChallengeTypeName(result.challenge.type) }}</h3>
+                    <p class="challenge-desc">{{ getChallengeDescription(result.challenge) }}</p>
+                  </div>
+                </div>
+                <div class="challenge-result">
+                  <div [class]="getResultBadgeClass(result.isSuccess)">
+                    {{ getResultBadgeText(result.isSuccess) }}
+                  </div>
+                  <div class="challenge-score">{{ result.score }}%</div>
                 </div>
               </div>
-              <div class="challenge-result">
-                <div class="result-badge success">Réussi</div>
-                <div class="challenge-score">100%</div>
-              </div>
-            </div>
-            <div class="challenge-stats">
-              <div class="stat-item">
-                <span class="stat-icon">⏱️</span>
-                <span class="stat-text">45s</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-icon">🎯</span>
-                <span class="stat-text">3/3 correctes</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Défi 2 -->
-          <div class="challenge-item success">
-            <div class="challenge-header">
-              <div class="challenge-info">
-                <div class="challenge-number">2</div>
-                <div class="challenge-details">
-                  <h3 class="challenge-name">Problème mathématique</h3>
-                  <p class="challenge-desc">Résoudre: 15 + 27 = ?</p>
+              <div class="challenge-stats">
+                <div class="stat-item">
+                  <span class="stat-icon">⏱️</span>
+                  <span class="stat-text">{{ formatTime(result.timeSpent) }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-icon">{{ result.isSuccess ? '✅' : '❌' }}</span>
+                  <span class="stat-text">{{ getChallengeStatText(result) }}</span>
                 </div>
               </div>
-              <div class="challenge-result">
-                <div class="result-badge success">Réussi</div>
-                <div class="challenge-score">100%</div>
-              </div>
             </div>
-            <div class="challenge-stats">
-              <div class="stat-item">
-                <span class="stat-icon">⏱️</span>
-                <span class="stat-text">12s</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-icon">✅</span>
-                <span class="stat-text">Première tentative</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Défi 3 -->
-          <div class="challenge-item success">
-            <div class="challenge-header">
-              <div class="challenge-info">
-                <div class="challenge-number">3</div>
-                <div class="challenge-details">
-                  <h3 class="challenge-name">Saisie de texte</h3>
-                  <p class="challenge-desc">Déchiffrer le texte déformé</p>
-                </div>
-              </div>
-              <div class="challenge-result">
-                <div class="result-badge success">Réussi</div>
-                <div class="challenge-score">95%</div>
-              </div>
-            </div>
-            <div class="challenge-stats">
-              <div class="stat-item">
-                <span class="stat-icon">⏱️</span>
-                <span class="stat-text">1:23</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-icon">🔤</span>
-                <span class="stat-text">1 erreur mineure</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Défi 4 -->
-          <div class="challenge-item success">
-            <div class="challenge-header">
-              <div class="challenge-info">
-                <div class="challenge-number">4</div>
-                <div class="challenge-details">
-                  <h3 class="challenge-name">Puzzle logique</h3>
-                  <p class="challenge-desc">Compléter la séquence</p>
-                </div>
-              </div>
-              <div class="challenge-result">
-                <div class="result-badge success">Réussi</div>
-                <div class="challenge-score">100%</div>
-              </div>
-            </div>
-            <div class="challenge-stats">
-              <div class="stat-item">
-                <span class="stat-icon">⏱️</span>
-                <span class="stat-text">1:45</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-icon">🧩</span>
-                <span class="stat-text">Solution optimale</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Défi 5 -->
-          <div class="challenge-item failed">
-            <div class="challenge-header">
-              <div class="challenge-info">
-                <div class="challenge-number">5</div>
-                <div class="challenge-details">
-                  <h3 class="challenge-name">Défi combiné</h3>
-                  <p class="challenge-desc">Images + calcul mental</p>
-                </div>
-              </div>
-              <div class="challenge-result">
-                <div class="result-badge failed">Échoué</div>
-                <div class="challenge-score">60%</div>
-              </div>
-            </div>
-            <div class="challenge-stats">
-              <div class="stat-item">
-                <span class="stat-icon">⏱️</span>
-                <span class="stat-text">2:18</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-icon">❌</span>
-                <span class="stat-text">2/5 correctes</span>
-              </div>
-            </div>
-          </div>
+          }
         </div>
       </div>
 
@@ -234,9 +126,9 @@
               <h3 class="analysis-title">Points forts</h3>
             </div>
             <ul class="analysis-list">
-              <li>Excellente rapidité sur les calculs simples</li>
-              <li>Très bonne reconnaissance visuelle</li>
-              <li>Concentration maintenue durant tout le test</li>
+              @for (strength of getStrengths(); track strength) {
+                <li>{{ strength }}</li>
+              }
             </ul>
           </div>
           
@@ -246,9 +138,9 @@
               <h3 class="analysis-title">Axes d'amélioration</h3>
             </div>
             <ul class="analysis-list">
-              <li>Attention aux défis combinés complexes</li>
-              <li>Prendre plus de temps pour vérifier</li>
-              <li>Gérer le stress sur les derniers défis</li>
+              @for (improvement of getImprovements(); track improvement) {
+                <li>{{ improvement }}</li>
+              }
             </ul>
           </div>
         </div>
@@ -267,20 +159,20 @@
               <div class="score-bar">
                 <div class="score-label">Votre score</div>
                 <div class="bar-container">
-                  <div class="bar user-bar" style="width: 87%">87%</div>
+                  <div class="bar user-bar" [style.width]="barWidth">{{ globalStats().globalScore }}%</div>
                 </div>
               </div>
               <div class="score-bar">
                 <div class="score-label">Moyenne générale</div>
                 <div class="bar-container">
-                  <div class="bar average-bar" style="width: 73%">73%</div>
+                  <div class="bar average-bar" [style.width]="averageBarWidth">{{ averageScore() }}%</div>
                 </div>
               </div>
             </div>
             
             <div class="ranking-info">
               <div class="ranking-card">
-                <div class="ranking-number">Top 25%</div>
+                <div class="ranking-number">{{ userRankingText }}</div>
                 <div class="ranking-text">des utilisateurs</div>
               </div>
             </div>
@@ -293,58 +185,46 @@
         <h2 class="section-title">Récompenses obtenues</h2>
         
         <div class="badges-grid">
-          <div class="badge-item earned">
-            <div class="badge-icon">🏁</div>
-            <div class="badge-info">
-              <h4 class="badge-name">Finisseur</h4>
-              <p class="badge-desc">Complété tous les défis</p>
+          @for (badge of earnedBadges; track badge.id) {
+            <div class="badge-item earned">
+              <div class="badge-icon">{{ badge.icon }}</div>
+              <div class="badge-info">
+                <h4 class="badge-name">{{ badge.name }}</h4>
+                <p class="badge-desc">{{ badge.description }}</p>
+              </div>
             </div>
-          </div>
+          }
           
-          <div class="badge-item earned">
-            <div class="badge-icon">⚡</div>
-            <div class="badge-info">
-              <h4 class="badge-name">Éclair</h4>
-              <p class="badge-desc">Défis 1-2 en moins de 1 minute</p>
+          @for (badge of lockedBadges; track badge.id) {
+            <div class="badge-item locked">
+              <div class="badge-icon">{{ badge.icon }}</div>
+              <div class="badge-info">
+                <h4 class="badge-name">{{ badge.name }}</h4>
+                <p class="badge-desc">{{ badge.description }}</p>
+              </div>
             </div>
-          </div>
-          
-          <div class="badge-item earned">
-            <div class="badge-icon">🎯</div>
-            <div class="badge-info">
-              <h4 class="badge-name">Précision</h4>
-              <p class="badge-desc">3 défis parfaits consécutifs</p>
-            </div>
-          </div>
-          
-          <div class="badge-item locked">
-            <div class="badge-icon">👑</div>
-            <div class="badge-info">
-              <h4 class="badge-name">Maître</h4>
-              <p class="badge-desc">Score parfait sur tous les défis</p>
-            </div>
-          </div>
+          }
         </div>
       </div>
 
       <!-- Actions finales -->
       <div class="final-actions">
         <div class="action-buttons">
-          <button class="secondary-button">
+          <button class="secondary-button" (click)="downloadReport()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path d="M8 17l4 4 4-4M12 1v20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             Télécharger le rapport
           </button>
           
-          <button class="secondary-button">
+          <button class="secondary-button" (click)="shareResults()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             Partager mes résultats
           </button>
           
-          <button class="primary-button">
+          <button class="primary-button" (click)="retryChallenge()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path d="M3 12l9-9 9 9M12 3v18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -353,7 +233,7 @@
         </div>
         
         <div class="back-home">
-          <button class="home-button">
+          <button class="home-button" (click)="goHome()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -364,4 +244,3 @@
     </div>
   </main>
 </div>
-

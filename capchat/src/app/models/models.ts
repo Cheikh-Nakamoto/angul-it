@@ -45,3 +45,28 @@ export interface MultipleChoiceChallenge extends ChallengeBase {
 export type Challenge =
   | ImageSelectionChallenge
   | MultipleChoiceChallenge;
+
+
+export interface ChallengeResult {
+  challenge: Challenge;
+  timeSpent: number;
+  score: number;
+  attempts: number;
+  isSuccess: boolean;
+}
+
+export interface GlobalStats {
+  globalScore: number;
+  totalTime: string;
+  successfulChallenges: number;
+  perfectStreak: number;
+  totalChallenges: number;
+}
+
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  earned: boolean;
+}

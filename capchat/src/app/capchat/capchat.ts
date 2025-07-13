@@ -127,6 +127,7 @@ export class Capchat implements OnInit, OnDestroy {
   }
 
 
+  
   previousChallenge(): void {
     if (this.challengesList.length > 0) {
       const previousChallenge = this.challengesList.pop();
