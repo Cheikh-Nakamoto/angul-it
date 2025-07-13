@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, Renderer2, signal, effect } from '@angular/core';
+import { Component, OnDestroy, OnInit, Renderer2, signal, effect, computed } from '@angular/core';
 import { ChallengeService } from '../services/challenge';
 import { Subject } from 'rxjs';
 import {
@@ -67,7 +67,6 @@ export class Capchat implements OnInit, OnDestroy {
     const elem = await this.challengeService.getRandomChallenge();
     this.currentChallenge.set(elem);
     this.timerService.startTimer(() => this.handleTimeUp());
-    console.log(this.challengesList);
   }
 
   handleTimeUp(): void {
@@ -77,35 +76,55 @@ export class Capchat implements OnInit, OnDestroy {
   private cleanupSelections(): void {
     // Nettoyer les sélections des réponses multiples
     const selectedAnswers = document.querySelectorAll('.selected-answer');
-    selectedAnswers.forEach(el => el.classList.remove('selected-answer'));
+    selectedAnswers.forEach(el => {
+      el.classList.remove('selected-answer');
+    });
 
     // Nettoyer les sélections d'images
     const selectedImages = document.querySelectorAll('.selected-img');
-    selectedImages.forEach(el => el.classList.remove('selected-img'));
+    selectedImages.forEach(el => {
+      el.classList.remove('selected-img');
+    });
+
+    // Réinitialiser le compteur
+    this.selectedImageCount.set(0);
   }
 
 
   async nextChallenge(): Promise<void> {
+    console.log("function next callback");
+
+    // ✅ Attendre un cycle de détection de changement avant le nettoyage
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     // Nettoyer les sélections visuelles
-    console.log("function next callback")
     this.cleanupSelections();
-    //creation du nouveau challenge
+
+    // Réinitialiser la sélection AVANT de charger le nouveau challenge
+    this.selectedAnswer.set(null);
+    this.isCorrect.set(null);
+
+    // Création du nouveau challenge
     const elem = await this.challengeService.getRandomChallenge();
     this.challengesList.push(this.currentChallenge());
     this.currentChallenge.set(elem);
+    const current = this.currentChallenge()
+    console.log(current);
 
-    // Réinitialiser la sélection
-    this.selectedAnswer.set(null);
-    //sauvegarde des ancien challenge fait par le client
+
+    // Sauvegarde des anciens challenges
     this.storageHelpers.saveChallenge("old", this.challengesList);
-    this.currentStep.set(Math.min(this.currentStep()+1, this.totalSteps()));
+    this.currentStep.set(Math.min(this.currentStep() + 1, this.totalSteps()));
     this.timerService.resetTimer();
   }
+
 
   previousChallenge(): void {
     if (this.challengesList.length > 0) {
       const previousChallenge = this.challengesList.pop();
       if (previousChallenge) {
+        // Réinitialiser la sélection
+        this.selectedAnswer.set(null);
         this.currentChallenge.set(previousChallenge);
         this.currentStep.set(Math.max(this.currentStep() - 1, 1));
         this.timerService.resetTimer();
@@ -116,6 +135,7 @@ export class Capchat implements OnInit, OnDestroy {
   get currentImageChallenge(): ImageSelectionChallenge | null {
     const challenge = this.currentChallenge();
     if (challenge.type === 'image_selection') {
+      console.log(challenge.isSuccess)
       return challenge as ImageSelectionChallenge;
     }
     return null;
@@ -161,6 +181,7 @@ export class Capchat implements OnInit, OnDestroy {
 
   private handleImageSelection(selectedId: string | number, className: string): void {
     // Initialize or clean up previous selection if needed
+    let count = this.selectedImageCount();
     if (this.selectedAnswer() === null) {
       this.selectedAnswer.set([]);
     } else if (!Array.isArray(this.selectedAnswer())) {
@@ -181,10 +202,12 @@ export class Capchat implements OnInit, OnDestroy {
     if (index > -1) {
       // Deselect the item
       this.domHelpers.removeClass(currentSelectedElement, className);
+      this.selectedImageCount.set(count - 1);
       this.selectedAnswer.set(selectedAnswersArray.filter(item => item !== selectedId));
     } else {
       this.domHelpers.addClass(currentSelectedElement, className);
       this.selectedAnswer.set([...selectedAnswersArray, selectedId]);
+      this.selectedImageCount.set(count + 1);
     }
   }
 
@@ -208,10 +231,11 @@ export class Capchat implements OnInit, OnDestroy {
     }
   }
 
-  verify_select() {
+  async verify_select() {
     let currentChallengeValue = this.currentChallenge();
     const selectedAnswerValue = this.selectedAnswer();
     let isCorrect: boolean = false;
+
     if (currentChallengeValue.type === "image_selection") {
       const correctPositions = currentChallengeValue.correctPos || [];
       let selectedAnswersArray: (string | number)[] = [];
@@ -228,9 +252,13 @@ export class Capchat implements OnInit, OnDestroy {
       const correctAnswer = currentChallengeValue.correct_answer;
       isCorrect = correctAnswer == selectedAnswer;
     }
+
     currentChallengeValue.isSuccess = isCorrect;
     this.currentChallenge.set(currentChallengeValue);
-    this.nextChallenge();
+
+    // ✅ Attendre que le DOM soit mis à jour avant de passer au challenge suivant
+    await new Promise(resolve => setTimeout(resolve, 0));
+    await this.nextChallenge();
   }
 
   ngOnDestroy() {

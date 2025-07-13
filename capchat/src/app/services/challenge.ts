@@ -59,7 +59,6 @@ export class ChallengeService {
         );
 
         const challengeQuestion = this.getSingleRandomChallengeQuestion(cleanedResults);
-        console.log(challengeQuestion)
         this.challenges.push(challengeQuestion);
       }
     } catch (error) {
@@ -85,6 +84,7 @@ export class ChallengeService {
   }
 
   async getRandomChallenge(): Promise<Challenge> {
+    this.challenges = [];
     await this.getChallengeImages();
     await this.getChallengeQuestion();
     return this.challenges[Math.floor(Math.random() * this.challenges.length)];
@@ -130,7 +130,6 @@ export class ChallengeService {
     }
     challengeImg.images = this.melangerSurPlace(challengeImg.images!);
     challengeImg.correctPos = this.findCorrectPosOnImg(challengeImg.images, searchTerm);
-    console.log(challengeImg.correctPos)
     this.challenges.push(challengeImg);
   }
 
@@ -147,7 +146,6 @@ export class ChallengeService {
     for (let index = 0; index < split_data.length; index++) {
       const img = split_data[index];
       const str = img["alternative_slugs"]["fr"] as string
-      console.log(str, str.includes(searchTerm))
       const img_data: DetailsImg = {
         url: img["urls"]["small"],
         alt: img["alternative_slugs"]["fr"],
