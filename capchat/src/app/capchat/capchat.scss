@@ -378,18 +378,63 @@ $gray-900: #111827;
   }
 }
 
-
 .selected-img {
   .selection-overlay {
     opacity: 1;
     visibility: visible;
+    background-color: rgba(16, 185, 129, 0.1); // Fond légèrement vert
+    transition: all 0.2s ease;
   }
 
   .image-placeholder {
     border-color: $success-color;
+    border-width: 3px; // Épaisseur de bordure plus visible
     box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    transition: all 0.2s ease;
+  }
+
+  // Optionnel: animation de la coche
+  .checkmark {
+    color: $success-color;
+    font-weight: bold;
+    transform: scale(1);
+    animation: checkmark-appear 0.3s ease;
   }
 }
+
+.wrong-selected-img {
+  .selection-overlay {
+    opacity: 1;
+    visibility: visible;
+    background-color: rgba(185, 16, 16, 0.1); // Fond légèrement rouge
+    transition: all 0.2s ease;
+  }
+
+  .image-placeholder {
+    border-color: $error-color;
+    border-width: 3px;
+    box-shadow: 0 0 0 3px rgba(185, 16, 16, 0.2);
+    transition: all 0.2s ease;
+  }
+
+  // Changer la coche en croix pour les erreurs
+  .checkmark {
+    color: $error-color;
+    font-weight: bold;
+    transform: scale(1);
+    text-indent: -9999px; // ✅ Masquer le contenu original
+
+    &::before {
+      content: '✗';
+      text-indent: 0; // ✅ Réafficher le pseudo-élément
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+}
+
 // Boutons d'action
 .action-buttons {
   display: flex;
@@ -758,7 +803,11 @@ $gray-900: #111827;
 
 
 .selected-answer {
-  background: $select-color 100% !important ;
+  background: $select-color 100% !important;
+}
+
+.wrong-selected-answer {
+  background: $error-color 100% !important;
 }
 
 // Animations spécifiques aux questions

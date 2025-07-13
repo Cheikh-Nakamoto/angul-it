@@ -18,9 +18,9 @@ export class StorageHelpers {
     return localStorage.getItem(key);
   }
 
-  getChallenge(id: string): Challenge[] | null {
+  getChallenge(id: string): Challenge[] | [] {
     const value = localStorage.getItem(id);
-    return value ? JSON.parse(value) : null;
+    return value ? JSON.parse(value) : [];
   }
 
   removeState(key: string): void {

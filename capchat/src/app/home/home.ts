@@ -10,7 +10,6 @@ import { Challenge } from '../models/models';
   styleUrl: './home.scss'
 })
 export class Home implements OnInit{
-  private challenge : Challenge[] = [];
   
   constructor(private challengeService : ChallengeService){}
 
