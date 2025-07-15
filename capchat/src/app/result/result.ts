@@ -20,7 +20,7 @@ export class Result implements OnInit {
     perfectStreak: 0,
     totalChallenges: 0
   });
-  
+
   badges = signal<Badge[]>([]);
   userRanking = signal<number>(0);
   averageScore = signal<number>(73);
@@ -29,7 +29,7 @@ export class Result implements OnInit {
     private router: Router,
     private storageHelpers: StorageHelpers,
     private timerService: TimerService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadChallengeResults();
@@ -48,9 +48,9 @@ export class Result implements OnInit {
     challenges.forEach((challenge: Challenge, index: number) => {
       const result: ChallengeResult = {
         challenge,
-        timeSpent: this.getRandomTime(10, 180), // Temps simulé en secondes
+        timeSpent: challenge.elapsed_time != undefined ? challenge.elapsed_time : 100, // Temps simulé en secondes
         score: this.calculateChallengeScore(challenge),
-        attempts: challenge.isSuccess ? 1 : Math.floor(Math.random() * 3) + 1,
+        attempts: challenge.attempts ? challenge.attempts : 1,
         isSuccess: challenge.isSuccess || false
       };
       results.push(result);
@@ -63,12 +63,13 @@ export class Result implements OnInit {
    * Calcule le score d'un défi individuel
    */
   private calculateChallengeScore(challenge: Challenge): number {
+    const elapsed_time = challenge.elapsed_time != undefined ? 165-challenge.elapsed_time : 165
     if (challenge.isSuccess) {
       // Score parfait avec petite variation aléatoire
-      return Math.floor(Math.random() * 10) + 90;
+      return  100 * (elapsed_time / 165);
     }
     // Score d'échec
-    return Math.floor(Math.random() * 40) + 30;
+    return 30 * (elapsed_time / 165);
   }
 
   /**
@@ -116,7 +117,7 @@ export class Result implements OnInit {
         name: 'Finisseur',
         description: 'Complété tous les défis',
         icon: '🏁',
-        earned: stats.totalChallenges >= 5
+        earned: stats.totalChallenges >= 9
       },
       {
         id: 'lightning',
@@ -157,7 +158,7 @@ export class Result implements OnInit {
   private calculateRanking(): void {
     const globalScore = this.globalStats().globalScore;
     const averageScore = this.averageScore();
-    
+
     if (globalScore >= 90) {
       this.userRanking.set(10); // Top 10%
     } else if (globalScore >= 80) {
@@ -251,7 +252,7 @@ export class Result implements OnInit {
       strengths.push('Excellente rapidité sur les défis simples');
     }
 
-    const imageSuccesses = results.filter(r => 
+    const imageSuccesses = results.filter(r =>
       r.challenge.type === 'image_selection' && r.isSuccess
     );
     if (imageSuccesses.length > 0) {

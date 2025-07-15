@@ -1,59 +1,64 @@
-# Capchat
+# Capchat Application
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.0.4.
+This project is an Angular application that implements a CAPTCHA-like challenge system. Users are presented with various challenges, including image selection and multiple-choice questions, to verify they are not robots.
 
-## Development server
+## Project Structure
 
-To start a local development server, run:
+The application is structured into several Angular components, services, and utility files:
 
-```bash
-ng serve
-```
+*   `src/app/capchat/`: Contains the core CAPTCHA challenge logic and UI.
+*   `src/app/home/`: The landing page of the application.
+*   `src/app/result/`: Displays the results after completing the challenges.
+*   `src/app/services/`: Houses services for managing challenges (`challenge.ts`) and timers (`timer.ts`).
+*   `src/app/utils/`: Contains utility functions for DOM manipulation (`dom-helpers.ts`), challenge-related helpers (`challenge-helpers.ts`), and local storage interactions (`storage-helpers.ts`).
+*   `src/app/models/`: Defines data models used throughout the application, such as `Challenge`, `MultipleChoiceChallenge`, and `ImageSelectionChallenge`.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Features
 
-## Code scaffolding
+*   **Multiple Challenge Types:** Supports image selection and multiple-choice challenges.
+*   **Dynamic Challenge Loading:** Challenges are fetched randomly.
+*   **Timer Functionality:** Each challenge has a time limit.
+*   **Navigation:** Users can navigate between challenges and to a results page.
+*   **Responsive Design:** (Assuming based on typical Angular projects, if not explicitly stated in code)
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Setup and Installation
 
-```bash
-ng generate component component-name
-```
+To set up and run this project locally, follow these steps:
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+1.  **Clone the repository:**
+    ```bash
+    git clone [repository-url]
+    cd capchat
+    ```
 
-```bash
-ng generate --help
-```
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-## Building
+3.  **Run the application:**
+    ```bash
+    ng serve
+    ```
+    This will start the development server. Open your browser and navigate to `http://localhost:4200/`.
 
-To build the project run:
+## Development
 
-```bash
-ng build
-```
+### Code Style
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+This project adheres to standard Angular and TypeScript best practices.
 
-## Running unit tests
+### Key Components and Services
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+*   **`Capchat` Component (`src/app/capchat/capchat.ts`):** Manages the state and logic for the CAPTCHA challenges. It interacts with `ChallengeService` to fetch challenges, `TimerService` for timing, and `DomHelpers` for UI manipulations.
+*   **`ChallengeService` (`src/app/services/challenge.ts`):** Responsible for providing challenge data.
+*   **`TimerService` (`src/app/services/timer.ts`):** Manages the countdown timer for challenges.
+*   **`DomHelpers` (`src/app/utils/dom-helpers.ts`):** Provides utility functions for interacting with the DOM, such as adding/removing classes and getting elements by ID.
 
-```bash
-ng test
-```
+## Contributing
 
-## Running end-to-end tests
+(Add guidelines for contributing if applicable)
 
-For end-to-end (e2e) testing, run:
+## License
 
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+(Specify license information)

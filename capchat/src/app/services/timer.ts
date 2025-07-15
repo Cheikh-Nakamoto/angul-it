@@ -31,7 +31,10 @@ export class TimerService {
     this.remainingSeconds = 165;
     this.timeRemaining.set('2:45');
   }
-
+  elapsed_time(): number {
+    const elapsed_time = 165-this.remainingSeconds;
+    return elapsed_time;
+  }
   ngOnDestroy(): void {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);

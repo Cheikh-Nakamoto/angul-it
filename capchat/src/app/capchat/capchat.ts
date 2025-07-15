@@ -40,7 +40,7 @@ export class Capchat implements OnInit, OnDestroy {
     private domHelpers: DomHelpers,
     private storageHelpers: StorageHelpers,
     private challengeHelpers: ChallengeHelpers,
-    private router : Router
+    private router: Router
   ) {
     effect(() => {
       const currentChallengeValue = this.currentChallenge();
@@ -101,7 +101,7 @@ export class Capchat implements OnInit, OnDestroy {
     console.log("function next callback");
     // ✅ Attendre un cycle de détection de changement avant le nettoyage
     await new Promise(resolve => setTimeout(resolve, 0));
-    
+
     // Nettoyer les sélections visuelles
     this.cleanupSelectionsWithHelpers();
 
@@ -109,13 +109,12 @@ export class Capchat implements OnInit, OnDestroy {
     this.selectedAnswer.set(null);
     this.isCorrect.set(null);
 
-    if (this.challengeHelpers.getNextChallengeId() >= this.totalSteps()){
+    if (this.challengeHelpers.getNextChallengeId() >= this.totalSteps()) {
       this.router.navigateByUrl("result")
     }
     // Création du nouveau challenge
     let elem = await this.challengeService.getRandomChallenge();
-    elem.id = this.challengeHelpers.getNextChallengeId()+1;
-    console.log(elem)
+    elem.id = this.challengeHelpers.getNextChallengeId() + 1;
     this.challengesList.push(this.currentChallenge());
     this.currentChallenge.set(elem);
 
@@ -127,24 +126,44 @@ export class Capchat implements OnInit, OnDestroy {
   }
 
 
-  
-  previousChallenge(): void {
-    if (this.challengesList.length > 0) {
-      const previousChallenge = this.challengesList.pop();
-      if (previousChallenge) {
-        // Réinitialiser la sélection
-        this.selectedAnswer.set(null);
-        this.currentChallenge.set(previousChallenge);
-        this.currentStep.set(Math.max(this.currentStep() - 1, 1));
-        this.timerService.resetTimer();
-      }
+
+  async targetChallenge(direction: number): Promise<void> {
+    // Calculate the target challenge ID (1-based)
+    let targetChallengeId = this.currentStep();
+    this.cleanupSelectionsWithHelpers()
+    if (direction === -1) {
+      targetChallengeId = Math.max(1, targetChallengeId - 1); // Go back, but not below 1
+    } else { // direction === 1
+      // Go forward, but not beyond the last completed challenge in challengesList
+      // The challengesList contains challenges from ID 1 to (challengesList.length)
+      targetChallengeId = Math.min(this.challengesList.length, targetChallengeId + 1);
+    }
+
+    // If the targetChallengeId is the same as the current one, or out of valid range, do nothing
+    // The valid range for targetChallengeId is 1 to challengesList.length
+    if (targetChallengeId < 1 || targetChallengeId > this.challengesList.length || targetChallengeId === this.currentStep()) {
+      await this.nextChallenge();
+      return;
+    }
+
+    // Access the challenge from challengesList using 0-based index
+    const targetChallenge = this.challengesList[targetChallengeId - 1];
+    console.log(targetChallenge)
+    if (targetChallenge) {
+      const selected = targetChallenge.selectedAnswer ?? null; // Use nullish coalescing for cleaner check
+      this.selectedAnswer.set(null); // Clear current selection
+      this.selectedImageCount.set(0)
+      this.currentChallenge.set(targetChallenge);
+      this.selectedAnswer.set(selected); // Set selection for the target challenge
+      this.currentStep.set(targetChallengeId); // Update current step to the target challenge ID
+      this.timerService.resetTimer();
+      await this.replaceSelect()
     }
   }
 
   get currentImageChallenge(): ImageSelectionChallenge | null {
     const challenge = this.currentChallenge();
     if (challenge.type === 'image_selection') {
-      console.log(challenge.isSuccess)
       return challenge as ImageSelectionChallenge;
     }
     return null;
@@ -178,19 +197,20 @@ export class Capchat implements OnInit, OnDestroy {
     return this.challengeHelpers.getDifficultyText(this.currentChallenge());
   }
 
-  selectAnswer(selectedId: string | number, selectionType: string): void {
+  selectAnswer(selectedId: string | number, selectionType: string, replace: string): void {
     const className = selectionType !== 'image_selection' ? 'selected-answer' : 'selected-img';
     if (selectionType === 'image_selection') {
-      this.handleImageSelection(selectedId, className);
+      this.handleImageSelection(selectedId, className, replace);
     } else {
       this.handleStandardSelection(selectedId, className);
 
     }
   }
 
-  private handleImageSelection(selectedId: string | number, className: string): void {
+  private handleImageSelection(selectedId: string | number, className: string, replace: string): void {
     // Initialize or clean up previous selection if needed
     let count = this.selectedImageCount();
+
     if (this.selectedAnswer() === null) {
       this.selectedAnswer.set([]);
     } else if (!Array.isArray(this.selectedAnswer())) {
@@ -207,8 +227,7 @@ export class Capchat implements OnInit, OnDestroy {
 
     const selectedAnswersArray = this.selectedAnswer() as (string | number)[];
     const index = selectedAnswersArray.indexOf(selectedId);
-
-    if (index > -1) {
+    if (index > -1 && replace != 'replace') {
       // Deselect the item
       this.domHelpers.removeClass(currentSelectedElement, className);
       this.selectedImageCount.set(count - 1);
@@ -218,6 +237,7 @@ export class Capchat implements OnInit, OnDestroy {
       this.selectedAnswer.set([...selectedAnswersArray, selectedId]);
       this.selectedImageCount.set(count + 1);
     }
+
   }
 
   private handleStandardSelection(selectedId: string | number, className: string): void {
@@ -261,20 +281,59 @@ export class Capchat implements OnInit, OnDestroy {
       const selectedAnswer = selectedAnswerValue as string;
       const correctAnswer = currentChallengeValue.correct_answer;
       isCorrect = correctAnswer == selectedAnswer;
-     
+
       //this.selectAnswer(selectedAnswer,"wrong-selected-answer")
     }
 
 
     if (isCorrect) {
       currentChallengeValue.isSuccess = isCorrect;
+      const elapsed_time = this.timerService.elapsed_time();
+
+      currentChallengeValue.elapsed_time = elapsed_time;
+      currentChallengeValue.selectedAnswer = selectedAnswerValue;
       this.currentChallenge.set(currentChallengeValue);
 
       // ✅ Attendre que le DOM soit mis à jour avant de passer au challenge suivant
-      await new Promise(resolve => setTimeout(resolve, 0));
       await this.nextChallenge();
-    }else{
-       this.replaceCurrentSelectionWithWrongClasses();
+    } else {
+      this.replaceCurrentSelectionWithWrongClasses();
+      currentChallengeValue.attempts = currentChallengeValue.attempts == undefined ? 1 : currentChallengeValue.attempts + 1;
+      this.currentChallenge.set(currentChallengeValue);
+    }
+  }
+
+  async replaceSelect() { // Made the function asynchronous
+    const currentChallenge = this.currentChallenge();
+    const selectedAnswer = currentChallenge.selectedAnswer;
+
+    // If no answer was previously selected, there's nothing to re-select visually.
+    if (selectedAnswer === null || selectedAnswer === undefined) {
+      return;
+    }
+
+    // Wait for the DOM to update before attempting to re-select elements.
+    // This addresses the "Element with ID 'X' not found" error.
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Determine challenge type based on the current challenge's type.
+    const challengeType = currentChallenge.type === 'image_selection' ? 'image_selection' : 'multiple';
+
+    if (Array.isArray(selectedAnswer)) {
+      // If selectedAnswer is an array, iterate over each item and select it.
+      for (const select of selectedAnswer) {
+        // Ensure 'select' is a string or number before passing to selectAnswer.
+        if (typeof select === 'string' || typeof select === 'number') {
+          console.log("ici imageselected")
+          this.selectAnswer(select, challengeType, "replace");
+        } else {
+          // Log a warning for unexpected types, though this case should ideally not occur.
+          console.warn(`Unexpected type for selected answer element: ${typeof select}. Expected string or number.`);
+        }
+      }
+    } else {
+      // If selectedAnswer is a single value (string or number), select it directly.
+      this.selectAnswer(selectedAnswer, challengeType, "replace");
     }
   }
 
@@ -289,7 +348,7 @@ export class Capchat implements OnInit, OnDestroy {
         selectedAnswerValue.forEach(id => {
           const element = this.domHelpers.getElementById(id);
           if (element) {
-            console.log("Id elem",id)
+            console.log("Id elem", id)
             this.domHelpers.removeClass(element, 'selected-img');
             this.domHelpers.addClass(element, 'wrong-selected-img');
           }
@@ -315,15 +374,16 @@ export class Capchat implements OnInit, OnDestroy {
     setTimeout(() => {
       this.cleanupSelectionsWithHelpers()
       this.selectedAnswer.set([]);
-    },1000)
+    }, 1000)
+  }
+
+  IsSuccess(): boolean {
+    const curentChallenge = this.currentChallenge();
+    return curentChallenge.isSuccess == undefined ? false : curentChallenge.isSuccess
   }
   ngOnDestroy() {
     this.timerService.ngOnDestroy();
     this.destroy$.next();
     this.destroy$.complete();
   }
-}
-
-function getChallenge(arg0: string) {
-  throw new Error('Function not implemented.');
 }

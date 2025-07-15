@@ -11,154 +11,163 @@
             <!-- Barre de progression dynamique -->
             <div class="progress-bar">
                 @for (step of [1,2,3,4,5,6,7,8,9,10]; track step) {
-                    <div class="progress-step" 
-                         [class.completed]="step < currentStep()"
-                         [class.current]="step === currentStep()">
-                        {{step}}
-                    </div>
-                    @if (step < 5) {
-                        <div class="progress-line" 
-                             [class.completed]="step < currentStep()"></div>
+                <div class="progress-step" [class.completed]="step < currentStep()"
+                    [class.current]="step === currentStep()">
+                    {{step}}
+                </div>
+                @if (step < 5) { <div class="progress-line" [class.completed]="step < currentStep()">
+            </div>
+            }
+            }
+        </div>
+
+        <!-- Bouton retour -->
+        <button class="back-button" (click)="targetChallenge(-1)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+            Retour
+        </button>
+</div>
+</header>
+
+<!-- Contenu principal -->
+<main class="captcha-main">
+    <div class="captcha-content">
+        <!-- Instructions -->
+        <div class="instructions-card">
+            <div class="challenge-info">
+                <span class="challenge-number">Défi {{currentStep()}}/{{totalSteps()}}</span>
+                <h2 class="challenge-title">
+                    @if (currentChallenge().type === 'image_selection') {
+                    Sélectionnez toutes les images contenant des <span class="highlight">{{getImageTarget()}}</span>
+                    } @else {
+                    {{getQuestionText()}}
                     }
+                </h2>
+                <p class="challenge-description">
+                    @if (currentChallenge().type === 'image_selection') {
+                    Cliquez sur chaque image qui contient l'élément recherché. Vous pouvez annuler votre sélection en
+                    cliquant à nouveau.
+                    } @else {
+                    Sélectionnez la bonne réponse parmi les options proposées.
+                    }
+                </p>
+            </div>
+
+            <!-- Timer -->
+            <div class="timer">
+                <div class="timer-icon">⏱️</div>
+                <span class="timer-text">{{timeRemaining()}}</span>
+            </div>
+        </div>
+
+        <!-- Grille d'images -->
+        <div class="image-grid-container">
+            @if(currentChallenge().type === "image_selection") {
+            <div class="image-grid">
+                @for (img of currentImageChallenge!.images ; track $index) {
+                <div class="image-item" id="{{$index}}" (click)="selectAnswer($index,'image_selection','')">
+                    <div class="image-placeholder">
+                        <div class="image-content">
+                            <img src="{{img.url}}" alt="{{img.alt || 'Image ' + ($index + 1)}}">
+                        </div>
+                    </div>
+                    <div class="selection-overlay">
+                        <div class="checkmark">✓</div>
+                    </div>
+                </div>
                 }
             </div>
 
-            <!-- Bouton retour -->
-            <button class="back-button" (click)="previousChallenge()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            <!-- Compteur de sélections -->
+            <div class="selection-counter">
+                <span class="counter-text">
+                    Images sélectionnées:
+                    <strong>{{selectedImageCount()}}/{{getMaxSelections()}}</strong>
+                </span>
+            </div>
+
+            }@else if (currentChallenge().type === 'multiple' || currentChallenge().type === 'boolean') {
+            <div class="question-container">
+                <!-- En-tête de la question -->
+                <div class="question-header">
+                    <div class="question-icon">?</div>
+                    <div class="question-meta">
+                        <div class="question-category">{{getCategoryText()}}</div>
+                        <div class="question-difficulty {{getDifficultyText()}}">
+                            {{getDifficultyText()}}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Texte de la question -->
+                <div class="question-text">
+                    {{getQuestionText()}}
+                </div>
+
+                <!-- Indicateur de réponse -->
+                <div class="answer-indicator" [class.has-answer]="selectedAnswer() !== null">
+                    @if (selectedAnswer() === null) {
+                    <span>Sélectionnez une réponse</span>
+                    } @else {
+                    <span>Réponse sélectionnée:
+                        <span class="selected-answer">{{selectedAnswer()}}</span>
+                    </span>
+                    }
+                </div>
+
+                <!-- Réponses pour les questions multiples ET boolean -->
+                <div class="answers-grid">
+                    @for (answer of getAnswerOptions(); track $index) {
+                    <div class="answer-option" (click)="selectAnswer(answer, currentChallenge().type || 'multiple','')">
+                        <div id="{{answer}}" class="answer-radio"></div>
+                        <div class="answer-text">{{answer}}</div>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+
+        <!-- Actions -->
+        <div class="action-buttons">
+            @if (!IsSuccess()) {
+            <button class="primary-button" (click)="verify_select()">
+                Vérifier ma sélection
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M5 12l5 5L20 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round" />
                 </svg>
-                Retour
+            </button>
+            }
+
+            @if (IsSuccess()) {
+            <button class="secondary-button" (click)="  targetChallenge(1)">
+                Avancez Vers
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M5 12h14m-7 7l7-7-7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </button>
+            }
+
+        </div>
+
+        <!-- Aide -->
+        <div class="help-section">
+            <button class="help-button">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                    <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                Besoin d'aide ?
             </button>
         </div>
-    </header>
-
-    <!-- Contenu principal -->
-    <main class="captcha-main">
-        <div class="captcha-content">
-            <!-- Instructions -->
-            <div class="instructions-card">
-                <div class="challenge-info">
-                    <span class="challenge-number">Défi {{currentStep()}}/{{totalSteps()}}</span>
-                    <h2 class="challenge-title">
-                        @if (currentChallenge().type === 'image_selection') {
-                            Sélectionnez toutes les images contenant des <span class="highlight">{{getImageTarget()}}</span>
-                        } @else {
-                            {{getQuestionText()}}
-                        }
-                    </h2>
-                    <p class="challenge-description">
-                        @if (currentChallenge().type === 'image_selection') {
-                            Cliquez sur chaque image qui contient l'élément recherché. Vous pouvez annuler votre sélection en cliquant à nouveau.
-                        } @else {
-                            Sélectionnez la bonne réponse parmi les options proposées.
-                        }
-                    </p>
-                </div>
-
-                <!-- Timer -->
-                <div class="timer">
-                    <div class="timer-icon">⏱️</div>
-                    <span class="timer-text">{{timeRemaining()}}</span>
-                </div>
-            </div>
-
-            <!-- Grille d'images -->
-            <div class="image-grid-container">
-                @if(currentChallenge().type === "image_selection") {
-                <div class="image-grid">
-                    @for (img of currentImageChallenge!.images ; track $index) {
-                    <div class="image-item" 
-                         id="{{$index}}" 
-                         (click)="selectAnswer($index,'image_selection')" >
-                        <div class="image-placeholder">
-                            <div class="image-content">
-                                <img src="{{img.url}}" alt="{{img.alt || 'Image ' + ($index + 1)}}">
-                            </div>
-                        </div>
-                        <div class="selection-overlay">
-                            <div class="checkmark">✓</div>
-                        </div>
-                    </div>
-                    }
-                </div>
-
-                <!-- Compteur de sélections -->
-                <div class="selection-counter">
-                    <span class="counter-text">
-                        Images sélectionnées: 
-                        <strong>{{selectedImageCount()}}/{{getMaxSelections()}}</strong>
-                    </span>
-                </div>
-
-                }@else if (currentChallenge().type === 'multiple' || currentChallenge().type === 'boolean') {
-                <div class="question-container">
-                    <!-- En-tête de la question -->
-                    <div class="question-header">
-                        <div class="question-icon">?</div>
-                        <div class="question-meta">
-                            <div class="question-category">{{getCategoryText()}}</div>
-                            <div class="question-difficulty {{getDifficultyText()}}">
-                                {{getDifficultyText()}}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Texte de la question -->
-                    <div class="question-text">
-                        {{getQuestionText()}}
-                    </div>
-
-                    <!-- Indicateur de réponse -->
-                    <div class="answer-indicator" [class.has-answer]="selectedAnswer() !== null">
-                        @if (selectedAnswer() === null) {
-                            <span>Sélectionnez une réponse</span>
-                        } @else {
-                            <span>Réponse sélectionnée: 
-                                <span class="selected-answer">{{selectedAnswer()}}</span>
-                            </span>
-                        }
-                    </div>
-
-                    <!-- Réponses pour les questions multiples ET boolean -->
-                    <div class="answers-grid">
-                        @for (answer of getAnswerOptions(); track $index) {
-                            <div class="answer-option" (click)="selectAnswer(answer, currentChallenge().type || 'multiple')">
-                                <div id="{{answer}}" class="answer-radio"></div>
-                                <div class="answer-text">{{answer}}</div>
-                            </div>
-                        }
-                    </div>
-                </div>
-                }
-            </div>
-
-            <!-- Actions -->
-            <div class="action-buttons">
-                <button class="primary-button" 
-                        (click)="verify_select()">
-                    Vérifier ma sélection
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M5 12l5 5L20 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Aide -->
-            <div class="help-section">
-                <button class="help-button">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
-                        <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                    </svg>
-                    Besoin d'aide ?
-                </button>
-            </div>
-        </div>
-    </main>
+    </div>
+</main>
 </div>

@@ -6,7 +6,10 @@ export interface ChallengeBase {
   question?: string;
   difficulty?: 'easy' | 'medium' | 'hard';
   animation?: string;
-  isSuccess?:boolean
+  isSuccess?: boolean;
+  attempts?: number;
+  elapsed_time?: number;
+  selectedAnswer?: string | number | (string | number)[] | null;
   testId?: string; // Pour les tests unitaires
 }
 
@@ -18,14 +21,14 @@ export type ChallengeType =
 export interface ImageSelectionChallenge extends ChallengeBase {
   type?: 'image_selection';
   images?: DetailsImg[];
-  correctPos?:number[]
+  correctPos?: number[]
 }
 
 export interface DetailsImg {
   url?: string;
   alt?: string;
   isCorrect?: boolean;
-  item?:string
+  item?: string
 }
 
 // export interface TextInputChallenge extends ChallengeBase {
@@ -36,7 +39,7 @@ export interface DetailsImg {
 // }
 
 export interface MultipleChoiceChallenge extends ChallengeBase {
-  type: 'multiple'| 'boolean';
+  type: 'multiple' | 'boolean';
   correct_answer: string;
   incorrect_answers: string[];
   category: string;
