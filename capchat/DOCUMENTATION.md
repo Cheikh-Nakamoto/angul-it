@@ -1,101 +1,242 @@
-# Capchat Project Documentation
+# Capchat Application
 
-## 1. Introduction
+A modern Angular application that implements an interactive CAPTCHA-like challenge system. Users must complete various verification challenges, including image selection and multiple-choice questions, to prove they are human.
 
-This document provides a detailed overview of the Capchat Angular application, covering its architecture, key components, services, and utility functions. The application aims to provide a CAPTCHA-like challenge system with various interactive challenges.
+## 🚀 Features
 
-## 2. Architecture Overview
+- **Multiple Challenge Types**: Support for image selection and multiple-choice question challenges
+- **Dynamic Challenge Loading**: Challenges are randomly fetched to ensure variety
+- **Timer Functionality**: Each challenge includes a configurable time limit with visual countdown
+- **Intuitive Navigation**: Seamless flow between challenges and results page
+- **Responsive Design**: Optimized for desktop and mobile devices
+- **Real-time Feedback**: Immediate validation and progress tracking
+- **Local Storage Integration**: Maintains challenge state and progress across sessions
 
-The Capchat application follows a modular architecture typical of Angular applications, organized into components, services, and utility modules.
+## 📁 Project Structure
 
-*   **Components:** Handle the UI and user interaction for specific views (e.g., `Capchat`, `Home`, `Result`).
-*   **Services:** Encapsulate business logic, data fetching, and state management, making them reusable across components (e.g., `ChallengeService`, `TimerService`).
-*   **Utilities:** Provide helper functions for common tasks like DOM manipulation, data transformations, and local storage interactions.
-*   **Models:** Define the data structures used throughout the application, ensuring type safety and consistency.
+```
+src/app/
+├── capchat/              # Core CAPTCHA challenge logic and UI components
+├── home/                 # Landing page and application entry point
+├── result/               # Results display and completion summary
+├── services/
+│   ├── challenge.ts      # Challenge data management and fetching
+│   └── timer.ts          # Timer functionality and countdown logic
+├── utils/
+│   ├── dom-helpers.ts    # DOM manipulation utilities
+│   ├── challenge-helpers.ts # Challenge-specific utility functions
+│   └── storage-helpers.ts   # Local storage interaction helpers
+└── models/               # TypeScript interfaces and data models
+    ├── Challenge.ts
+    ├── MultipleChoiceChallenge.ts
+    └── ImageSelectionChallenge.ts
+```
 
-## 3. Core Modules and Functionalities
+## 🛠️ Setup and Installation
 
-### 3.1. `Capchat` Component (`src/app/capchat/capchat.ts`)
+### Prerequisites
 
-This is the central component for managing the CAPTCHA challenge flow.
+- Node.js (version 16 or higher)
+- Angular CLI (version 15 or higher)
+- npm or yarn package manager
 
-*   **State Management:** Uses Angular signals (`currentChallenge`, `selectedAnswer`, `isCorrect`, `currentStep`, `selectedImageCount`) for reactive state management, ensuring efficient updates to the UI.
-*   **Challenge Lifecycle:**
-    *   `ngOnInit()`: Initializes the first challenge, sets up the timer, and retrieves previous challenges from storage.
-    *   `nextChallenge()`: Advances to the next challenge, cleans up previous selections, resets the timer, and navigates to the result page if all challenges are completed.
-    *   `targetChallenge(direction: number)`: Allows navigation to previous or next challenges in the history.
-*   **Answer Selection (`selectAnswer`):**
-    *   Delegates to `handleImageSelection` or `handleStandardSelection` based on the challenge type.
-    *   Manages adding/removing CSS classes (`selected-answer`, `selected-img`) to visually indicate selections.
-*   **Verification (`verify_select`):**
-    *   Compares the `selectedAnswer` with the `correct_answer` based on the challenge type.
-    *   Updates `isCorrect` signal and `currentChallenge` properties (`isSuccess`, `elapsed_time`, `selectedAnswer`).
-    *   Calls `nextChallenge()` on success or `replaceCurrentSelectionWithWrongClasses()` on failure.
-*   **DOM Interaction:** Utilizes `DomHelpers` for direct DOM manipulation, ensuring proper class management for visual feedback.
-*   **Error Handling:** Includes `console.warn` for cases where elements are not found during selection, and defensive checks for `null`/`undefined` values.
+### Installation Steps
 
-### 3.2. `ChallengeService` (`src/app/services/challenge.ts`)
+1. **Clone the repository**
+   ```bash
+   git clone [repository-url]
+   cd capchat
+   ```
 
-*   **Purpose:** Provides methods for fetching random challenge data.
-*   **Key Method:** `getRandomChallenge()`: Asynchronously fetches a new challenge.
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-### 3.3. `TimerService` (`src/app/services/timer.ts`)
+3. **Start the development server**
+   ```bash
+   ng serve
+   ```
 
-*   **Purpose:** Manages a countdown timer for each challenge.
-*   **Key Methods:**
-    *   `startTimer(callback: () => void)`: Starts the timer and executes a callback function when time runs out.
-    *   `resetTimer()`: Resets the timer to its initial state.
-    *   `elapsed_time()`: Returns the time elapsed since the timer started.
+4. **Open the application**
+   Navigate to `http://localhost:4200/` in your browser
 
-### 3.4. `DomHelpers` (`src/app/utils/dom-helpers.ts`)
+### Build for Production
 
-*   **Purpose:** A utility service for abstracting direct DOM manipulation.
-*   **Key Methods:**
-    *   `getElementById(id: string | number)`: Safely retrieves an HTML element by its ID.
-    *   `addClass(element: HTMLElement, className: string)`: Adds a CSS class to an element.
-    *   `removeClass(element: HTMLElement, className: string)`: Removes a CSS class from an element.
+```bash
+ng build --prod
+```
 
-### 3.5. `StorageHelpers` (`src/app/utils/storage-helpers.ts`)
+The build artifacts will be stored in the `dist/` directory.
 
-*   **Purpose:** Provides utility functions for interacting with browser's local storage.
-*   **Key Methods:**
-    *   `saveChallenge(key: string, challenges: Challenge[])`: Saves challenge data to local storage.
-    *   `getChallenge(key: string)`: Retrieves challenge data from local storage.
+## 🏗️ Architecture Overview
 
-### 3.6. `ChallengeHelpers` (`src/app/utils/challenge-helpers.ts`)
+### Core Components
 
-*   **Purpose:** Contains helper functions related to challenge data processing and validation.
-*   **Key Methods:**
-    *   `getMaxSelections(challenge: Challenge)`: Returns the maximum number of selections allowed for an image challenge.
-    *   `getAnswerOptions(challenge: Challenge)`: Returns the answer options for a multiple-choice challenge.
-    *   `getImageTarget(challenge: Challenge)`: Returns the target image description for an image selection challenge.
-    *   `canVerify(selectedAnswer: any, selectedImageCount: number, challenge: Challenge)`: Determines if the current selection can be verified.
-    *   `getQuestionText(challenge: Challenge)`: Returns the question text for the current challenge.
-    *   `getCategoryText(challenge: Challenge)`: Returns the category text for the current challenge.
-    *   `getDifficultyText(challenge: Challenge)`: Returns the difficulty text for the current challenge.
-    *   `getNextChallengeId()`: Generates the ID for the next challenge.
+#### **Capchat Component** (`src/app/capchat/capchat.ts`)
+- Primary orchestrator for challenge flow and state management
+- Integrates with `ChallengeService` for data fetching
+- Manages timer functionality through `TimerService`
+- Handles UI updates via `DomHelpers`
 
-### 3.7. Models (`src/app/models/models.ts`)
+#### **ChallengeService** (`src/app/services/challenge.ts`)
+- Centralized challenge data provider
+- Implements random challenge selection algorithm
+- Manages challenge validation logic
 
-Defines the interfaces for different challenge types:
+#### **TimerService** (`src/app/services/timer.ts`)
+- Provides countdown timer functionality
+- Emits timer events for UI updates
+- Handles timer pause/resume operations
 
-*   `Challenge`: Base interface for all challenges.
-*   `MultipleChoiceChallenge`: Extends `Challenge` with properties specific to multiple-choice questions.
-*   `ImageSelectionChallenge`: Extends `Challenge` with properties specific to image selection challenges.
-*   `ChallengeType`: A union type defining possible challenge types (`'multiple'`, `'boolean'`, `'image_selection'`).
+#### **Utility Modules**
+- **DomHelpers**: Cross-browser DOM manipulation utilities
+- **ChallengeHelpers**: Challenge-specific validation and processing
+- **StorageHelpers**: Local storage abstraction layer
 
-## 4. Development Guidelines
+### Data Models
 
-*   **Reactive Programming:** Leverage Angular Signals for state management to ensure efficient change detection and reactive updates.
-*   **Separation of Concerns:** Keep components lean by delegating business logic to services and utility functions.
-*   **Type Safety:** Utilize TypeScript interfaces and types to enforce data consistency and catch errors at compile time.
-*   **DOM Manipulation:** Prefer using `DomHelpers` for direct DOM interactions to centralize and abstract these operations.
-*   **Asynchronous Operations:** Use `async/await` for handling asynchronous operations, especially when interacting with external services or waiting for DOM updates.
+- **Challenge**: Base interface for all challenge types
+- **MultipleChoiceChallenge**: Extends Challenge for question-based challenges
+- **ImageSelectionChallenge**: Extends Challenge for image-based verification
 
-## 5. Future Enhancements (Potential)
+## 🎯 Usage Examples
 
-*   **Backend Integration:** Implement a robust backend for storing and serving challenges.
-*   **User Authentication:** Add user authentication and progress tracking.
-*   **More Challenge Types:** Introduce new types of CAPTCHA challenges.
-*   **Styling and Theming:** Enhance the UI/UX with more advanced styling and theming options.
-*   **Unit and Integration Tests:** Implement comprehensive tests for all components, services, and utilities.
+### Basic Implementation
+
+```typescript
+// Initialize a new challenge
+const challenge = await this.challengeService.getRandomChallenge();
+
+// Start the timer
+this.timerService.startTimer(challenge.timeLimit);
+
+// Handle challenge completion
+onChallengeComplete(result: boolean) {
+  this.timerService.stopTimer();
+  this.navigateToResults(result);
+}
+```
+
+### Custom Challenge Types
+
+```typescript
+// Extend base Challenge interface
+interface CustomChallenge extends Challenge {
+  customProperty: string;
+  validate(userInput: any): boolean;
+}
+```
+
+## 🧪 Development
+
+### Code Style Guidelines
+
+- Follow Angular Style Guide conventions
+- Use TypeScript strict mode
+- Implement proper error handling
+- Write unit tests for all services
+- Use meaningful component and variable names
+
+### Running Tests
+
+```bash
+# Unit tests
+ng test
+
+# End-to-end tests
+ng e2e
+
+# Test coverage
+ng test --code-coverage
+```
+
+### Linting
+
+```bash
+ng lint
+```
+
+## 🚢 Deployment
+
+### Docker Deployment
+
+```dockerfile
+FROM node:16-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build --prod
+
+FROM nginx:alpine
+COPY --from=builder /app/dist/capchat /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+### Environment Configuration
+
+Create environment-specific configuration files:
+
+```typescript
+// src/environments/environment.prod.ts
+export const environment = {
+  production: true,
+  apiUrl: 'https://api.example.com',
+  challengeTimeout: 30000
+};
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please follow these guidelines:
+
+1. **Fork the repository** and create a feature branch
+2. **Write tests** for new functionality
+3. **Follow coding standards** and run linting
+4. **Submit a pull request** with a clear description of changes
+
+### Commit Message Format
+
+```
+type(scope): subject
+
+body
+
+footer
+```
+
+Example:
+```
+feat(challenge): add new puzzle challenge type
+
+Implemented jigsaw puzzle challenge with drag-and-drop functionality.
+Includes timer integration and responsive design.
+
+Closes #123
+```
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🐛 Issues and Support
+
+- **Bug Reports**: Use the GitHub Issues tab
+- **Feature Requests**: Submit via GitHub Issues with the "enhancement" label
+- **Documentation**: Check the `/docs` folder for additional information
+
+## 🔄 Changelog
+
+### v1.0.0 (Current)
+- Initial release with basic CAPTCHA functionality
+- Image selection and multiple-choice challenges
+- Timer system implementation
+- Responsive design
+
+---
+
+**Built with ❤️ using Angular and TypeScript**
