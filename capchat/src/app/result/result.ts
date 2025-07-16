@@ -319,7 +319,7 @@ export class Result implements OnInit {
   retryChallenge(): void {
     // Nettoyer le localStorage et rediriger
     this.storageHelpers.clearStorage();
-    this.router.navigateByUrl('/capchat');
+    this.router.navigateByUrl('/captcha');
   }
 
   goHome(): void {

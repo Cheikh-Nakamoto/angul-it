@@ -13,6 +13,7 @@ import { StorageHelpers } from '../utils/storage-helpers';
 import { ChallengeHelpers } from '../utils/challenge-helpers';
 import { TimerService } from '../services/timer';
 import { Route, Router } from '@angular/router';
+import { DataService } from '../services/data-service';
 
 @Component({
   selector: 'app-capchat',
@@ -29,7 +30,7 @@ export class Capchat implements OnInit, OnDestroy {
 
   // Variables pour le template
   currentStep = signal<number>(1);
-  totalSteps = signal<number>(10);
+  totalSteps = signal<number>(5);
   selectedImageCount = signal<number>(0);
   maxSelections = signal<number>(3);
 
@@ -40,6 +41,7 @@ export class Capchat implements OnInit, OnDestroy {
     private domHelpers: DomHelpers,
     private storageHelpers: StorageHelpers,
     private challengeHelpers: ChallengeHelpers,
+    private dataService: DataService,
     private router: Router
   ) {
     effect(() => {
@@ -66,7 +68,7 @@ export class Capchat implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     let elem = await this.challengeService.getRandomChallenge();
-    elem.id = this.challengeHelpers.getNextChallengeId();
+    elem.id = await this.challengeHelpers.getNextChallengeId();
     this.currentChallenge.set(elem);
     this.challengesList = this.storageHelpers.getChallenge("old")!;
     this.currentStep.set(elem.id);
@@ -97,7 +99,7 @@ export class Capchat implements OnInit, OnDestroy {
   }
 
 
-  async nextChallenge(): Promise<void> {
+  async nextChallenge(type: string): Promise<void> {
     console.log("function next callback");
     // ✅ Attendre un cycle de détection de changement avant le nettoyage
     await new Promise(resolve => setTimeout(resolve, 0));
@@ -109,20 +111,26 @@ export class Capchat implements OnInit, OnDestroy {
     this.selectedAnswer.set(null);
     this.isCorrect.set(null);
 
-    if (this.challengeHelpers.getNextChallengeId() >= this.totalSteps()) {
+    if (await this.challengeHelpers.getNextChallengeId() >= this.totalSteps()) {
+      this.dataService.CaptchaComplet();
       this.router.navigateByUrl("result")
     }
-    // Création du nouveau challenge
-    let elem = await this.challengeService.getRandomChallenge();
-    elem.id = this.challengeHelpers.getNextChallengeId() + 1;
-    this.challengesList.push(this.currentChallenge());
-    this.currentChallenge.set(elem);
-
 
     // Sauvegarde des anciens challenges
+    console.log("pass" == type)
+    if (type != 'pass') {
+      console.log("cureen")
+      this.challengesList.push(this.currentChallenge());
+    }
     this.storageHelpers.saveChallenge("old", this.challengesList);
-    this.currentStep.set(Math.min(elem.id, this.totalSteps()));
+    this.currentStep.set(Math.min(this.challengesList.length + 1, this.totalSteps()));
     this.timerService.resetTimer();
+
+
+    // Création du nouveau challenge
+    let elem = await this.challengeService.getRandomChallenge();
+    elem.id = await this.challengeHelpers.getNextChallengeId();
+    this.currentChallenge.set(elem);
   }
 
 
@@ -138,11 +146,16 @@ export class Capchat implements OnInit, OnDestroy {
       // The challengesList contains challenges from ID 1 to (challengesList.length)
       targetChallengeId = Math.min(this.challengesList.length, targetChallengeId + 1);
     }
+    console.log('home page back')
+    if (targetChallengeId - 1 <= 0) {
+      this.router.navigateByUrl('');
+      return;
+    }
 
     // If the targetChallengeId is the same as the current one, or out of valid range, do nothing
     // The valid range for targetChallengeId is 1 to challengesList.length
-    if (targetChallengeId < 1 || targetChallengeId > this.challengesList.length || targetChallengeId === this.currentStep()) {
-      await this.nextChallenge();
+    if (targetChallengeId > this.challengesList.length || targetChallengeId === this.currentStep()) {
+      await this.nextChallenge("pass");
       return;
     }
 
@@ -295,7 +308,7 @@ export class Capchat implements OnInit, OnDestroy {
       this.currentChallenge.set(currentChallengeValue);
 
       // ✅ Attendre que le DOM soit mis à jour avant de passer au challenge suivant
-      await this.nextChallenge();
+      await this.nextChallenge("new");
     } else {
       this.replaceCurrentSelectionWithWrongClasses();
       currentChallengeValue.attempts = currentChallengeValue.attempts == undefined ? 1 : currentChallengeValue.attempts + 1;

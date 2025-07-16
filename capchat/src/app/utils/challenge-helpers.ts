@@ -6,7 +6,7 @@ import { ChallengeService } from '../services/challenge';
   providedIn: 'root'
 })
 export class ChallengeHelpers {
-  constructor(private challengeService: ChallengeService) {}
+  constructor(private challengeService: ChallengeService) { }
 
   getMaxSelections(challenge: Challenge): number {
     if (challenge.type === 'image_selection' && challenge.correctPos) {
@@ -57,15 +57,18 @@ export class ChallengeHelpers {
    * Récupère le prochain ID basé sur la challengesList du localStorage
    * @returns Le prochain ID disponible (plus grand ID + 1) ou 1 si aucun challenge trouvé
    */
-  getNextChallengeId(): number {
+  async getNextChallengeId(): Promise<number> {
     // Récupérer la challengesList depuis le localStorage
+    // ✅ Attendre un cycle de détection de changement avant le nettoyage
+    await new Promise(resolve => setTimeout(resolve, 0));
     const challengeListJson = localStorage.getItem('old');
-    
+    const valu = !challengeListJson || challengeListJson === ''
+    console.log(typeof (challengeListJson), challengeListJson?.length , !challengeListJson || challengeListJson === '')
     // Si rien dans le localStorage, retourner 1
-    if (!challengeListJson) {
+    if (!challengeListJson || challengeListJson === '') {
       return 1;
     }
-    
+
     let challengeList: Challenge[] = [];
     try {
       challengeList = JSON.parse(challengeListJson);
@@ -73,7 +76,7 @@ export class ChallengeHelpers {
       console.error('Erreur lors du parsing de challengesList:', error);
       return 1;
     }
-    
+
     return challengeList.length + 1;
   }
 

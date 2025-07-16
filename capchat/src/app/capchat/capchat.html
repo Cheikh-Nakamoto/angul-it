@@ -10,7 +10,7 @@
 
             <!-- Barre de progression dynamique -->
             <div class="progress-bar">
-                @for (step of [1,2,3,4,5,6,7,8,9,10]; track step) {
+                @for (step of [1,2,3,4,5]; track step) {
                 <div class="progress-step" [class.completed]="step < currentStep()"
                     [class.current]="step === currentStep()">
                     {{step}}

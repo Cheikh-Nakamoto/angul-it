@@ -45,12 +45,21 @@
 
         <!-- CTA Button -->
         <div class="cta-section">
-          <button class="cta-button" >
+          <button class="cta-button" (click)="BeginCaptcha()">
             <span class="cta-text">Commencer le défi</span>
             <svg class="cta-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
+          @if (CaptchaRunning()) {
+            <button class="cta-button" (click)="goToCaptcha()">
+             <span class="cta-text">Reprende le défi</span>
+             <svg class="cta-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+               <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+             </svg>
+           </button>
+          }
+         
           <p class="cta-subtitle">Aucune inscription requise</p>
         </div>
       </div>
