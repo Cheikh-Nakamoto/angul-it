@@ -63,10 +63,10 @@ export class Result implements OnInit {
    * Calcule le score d'un défi individuel
    */
   private calculateChallengeScore(challenge: Challenge): number {
-    const elapsed_time = challenge.elapsed_time != undefined ? 165-challenge.elapsed_time : 165
+    const elapsed_time = challenge.elapsed_time != undefined ? 165 - challenge.elapsed_time : 165
     if (challenge.isSuccess) {
       // Score parfait avec petite variation aléatoire
-      return  100 * (elapsed_time / 165);
+      return 100 * (elapsed_time / 165);
     }
     // Score d'échec
     return 30 * (elapsed_time / 165);
@@ -304,16 +304,255 @@ export class Result implements OnInit {
   }
 
   /**
-   * Actions des boutons
-   */
+  * Actions des boutons
+  */
   downloadReport(): void {
-    // Logique pour télécharger le rapport
-    console.log('Téléchargement du rapport...');
+    try {
+      const reportData = this.generateReportData();
+      const reportContent = this.formatReportContent(reportData);
+
+      // Créer un blob avec le contenu du rapport
+      const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+
+      // Créer un lien de téléchargement
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `rapport_captcha_${new Date().toISOString().split('T')[0]}.txt`;
+
+      // Déclencher le téléchargement
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Nettoyer l'URL
+      URL.revokeObjectURL(link.href);
+
+      console.log('Rapport téléchargé avec succès');
+    } catch (error) {
+      console.error('Erreur lors du téléchargement du rapport:', error);
+    }
   }
 
   shareResults(): void {
-    // Logique pour partager les résultats
-    console.log('Partage des résultats...');
+    try {
+      const stats = this.globalStats();
+      const shareText = this.generateShareText(stats);
+
+      // Vérifier si l'API Web Share est supportée
+      if (navigator.share) {
+        navigator.share({
+          title: 'Mes résultats au test CAPTCHA',
+          text: shareText,
+          url: window.location.href
+        }).then(() => {
+          console.log('Résultats partagés avec succès');
+        }).catch((error) => {
+          console.error('Erreur lors du partage:', error);
+          this.fallbackShare(shareText);
+        });
+      } else {
+        // Fallback pour les navigateurs qui ne supportent pas Web Share API
+        this.fallbackShare(shareText);
+      }
+    } catch (error) {
+      console.error('Erreur lors du partage des résultats:', error);
+    }
+  }
+
+  /**
+   * Génère les données du rapport
+   */
+  private generateReportData(): any {
+    const results = this.challengeResults();
+    const stats = this.globalStats();
+    const badges = this.earnedBadges;
+    const strengths = this.getStrengths();
+    const improvements = this.getImprovements();
+
+    return {
+      date: new Date().toLocaleDateString('fr-FR'),
+      time: new Date().toLocaleTimeString('fr-FR'),
+      globalStats: stats,
+      challengeResults: results,
+      badges: badges,
+      strengths: strengths,
+      improvements: improvements,
+      ranking: this.userRankingText
+    };
+  }
+
+  /**
+   * Formate le contenu du rapport en texte
+   */
+  private formatReportContent(data: any): string {
+    let content = '';
+
+    content += '==========================================\n';
+    content += '         RAPPORT DE TEST CAPTCHA         \n';
+    content += '==========================================\n\n';
+
+    content += `Date: ${data.date}\n`;
+    content += `Heure: ${data.time}\n\n`;
+
+    content += '--- STATISTIQUES GLOBALES ---\n';
+    content += `Score global: ${data.globalStats.globalScore}%\n`;
+    content += `Temps total: ${data.globalStats.totalTime}\n`;
+    content += `Défis réussis: ${data.globalStats.successfulChallenges}/${data.globalStats.totalChallenges}\n`;
+    content += `Série parfaite: ${data.globalStats.perfectStreak}\n`;
+    content += `Classement: ${data.ranking}\n\n`;
+
+    content += '--- DÉTAIL DES DÉFIS ---\n';
+    data.challengeResults.forEach((result: any, index: number) => {
+      content += `Défi ${index + 1}: ${this.getChallengeTypeName(result.challenge.type)}\n`;
+      content += `  Résultat: ${result.isSuccess ? 'Réussi' : 'Échoué'}\n`;
+      content += `  Score: ${Math.round(result.score)}%\n`;
+      content += `  Temps: ${this.formatTime(result.timeSpent)}\n`;
+      content += `  Tentatives: ${result.attempts}\n\n`;
+    });
+
+    content += '--- BADGES OBTENUS ---\n';
+    if (data.badges.length > 0) {
+      data.badges.forEach((badge: any) => {
+        content += `${badge.icon} ${badge.name}: ${badge.description}\n`;
+      });
+    } else {
+      content += 'Aucun badge obtenu\n';
+    }
+    content += '\n';
+
+    content += '--- POINTS FORTS ---\n';
+    data.strengths.forEach((strength: string) => {
+      content += `• ${strength}\n`;
+    });
+    content += '\n';
+
+    content += '--- AXES D\'AMÉLIORATION ---\n';
+    data.improvements.forEach((improvement: string) => {
+      content += `• ${improvement}\n`;
+    });
+    content += '\n';
+
+    content += '==========================================\n';
+    content += 'Rapport généré automatiquement\n';
+    content += '==========================================\n';
+
+    return content;
+  }
+
+  /**
+   * Génère le texte de partage
+   */
+  private generateShareText(stats: any): string {
+    const badges = this.earnedBadges;
+    const badgeEmojis = badges.map(b => b.icon).join(' ');
+
+    return `🎯 J'ai terminé le test CAPTCHA !
+📊 Score global: ${stats.globalScore}%
+✅ ${stats.successfulChallenges}/${stats.totalChallenges} défis réussis
+⏱️ Temps total: ${stats.totalTime}
+🏆 Classement: ${this.userRankingText}
+${badgeEmojis ? `🎖️ Badges: ${badgeEmojis}` : ''}
+
+#CAPTCHA #Test #Sécurité`;
+  }
+
+  /**
+   * Solution de fallback pour le partage
+   */
+  private fallbackShare(shareText: string): void {
+    // Copier dans le presse-papiers
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(shareText).then(() => {
+        this.showShareModal('Texte copié dans le presse-papiers !');
+      }).catch(() => {
+        this.showShareModal('Erreur lors de la copie');
+      });
+    } else {
+      // Fallback pour les anciens navigateurs
+      const textArea = document.createElement('textarea');
+      textArea.value = shareText;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        document.execCommand('copy');
+        this.showShareModal('Texte copié dans le presse-papiers !');
+      } catch (err) {
+        this.showShareModal('Impossible de copier le texte');
+      }
+
+      document.body.removeChild(textArea);
+    }
+  }
+
+  /**
+   * Affiche un modal de notification pour le partage
+   */
+  private showShareModal(message: string): void {
+    // Créer un modal temporaire
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #4CAF50;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    z-index: 10000;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    font-family: Arial, sans-serif;
+  `;
+    modal.textContent = message;
+
+    document.body.appendChild(modal);
+
+    // Supprimer le modal après 3 secondes
+    setTimeout(() => {
+      if (document.body.contains(modal)) {
+        document.body.removeChild(modal);
+      }
+    }, 3000);
+  }
+
+  /**
+   * Alternative avec téléchargement PDF (optionnel)
+   * Nécessite l'installation de jsPDF: npm install jspdf
+   */
+  downloadPDFReport(): void {
+    // Décommentez si vous voulez utiliser jsPDF
+
+    import('jspdf').then(({ jsPDF }) => {
+      const doc = new jsPDF();
+      const reportData = this.generateReportData();
+
+      // Configuration du PDF
+      doc.setFontSize(20);
+      doc.text('Rapport de Test CAPTCHA', 20, 20);
+
+      doc.setFontSize(12);
+      let yPosition = 40;
+
+      // Ajouter les statistiques
+      doc.text(`Date: ${reportData.date}`, 20, yPosition);
+      yPosition += 10;
+      doc.text(`Score global: ${reportData.globalStats.globalScore}%`, 20, yPosition);
+      yPosition += 10;
+      doc.text(`Temps total: ${reportData.globalStats.totalTime}`, 20, yPosition);
+      yPosition += 10;
+      doc.text(`Défis réussis: ${reportData.globalStats.successfulChallenges}/${reportData.globalStats.totalChallenges}`, 20, yPosition);
+
+      // Ajouter plus de contenu...
+
+      // Télécharger le PDF
+      doc.save(`rapport_captcha_${reportData.date}.pdf`);
+    });
+
   }
 
   retryChallenge(): void {

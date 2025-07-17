@@ -147,7 +147,7 @@ export class Capchat implements OnInit, OnDestroy {
       targetChallengeId = Math.min(this.challengesList.length, targetChallengeId + 1);
     }
     console.log('home page back')
-    if (targetChallengeId - 1 <= 0) {
+    if (targetChallengeId - 1 < 0) {
       this.router.navigateByUrl('');
       return;
     }
