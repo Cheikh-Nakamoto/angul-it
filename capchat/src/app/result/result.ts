@@ -117,7 +117,7 @@ export class Result implements OnInit {
         name: 'Finisseur',
         description: 'Complété tous les défis',
         icon: '🏁',
-        earned: stats.totalChallenges >= 9
+        earned: stats.totalChallenges >= 5
       },
       {
         id: 'lightning',
@@ -138,7 +138,7 @@ export class Result implements OnInit {
         name: 'Maître',
         description: 'Score parfait sur tous les défis',
         icon: '👑',
-        earned: results.every(r => r.score >= 95)
+        earned: results.every(r => r.score >= 90)
       }
     ];
 
@@ -149,7 +149,7 @@ export class Result implements OnInit {
    * Vérifie si l'utilisateur a obtenu le badge Éclair
    */
   private hasLightningBadge(results: ChallengeResult[]): boolean {
-    return results.slice(0, 2).every(r => r.timeSpent < 60);
+    return results.slice(0, 2).every(r => r.timeSpent < 30);
   }
 
   /**
