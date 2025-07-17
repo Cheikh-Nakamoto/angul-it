@@ -67,12 +67,20 @@ export class Capchat implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-    let elem = await this.challengeService.getRandomChallenge();
+    let elem = await this.getGoodChallenge();
     elem.id = await this.challengeHelpers.getNextChallengeId();
     this.currentChallenge.set(elem);
     this.challengesList = this.storageHelpers.getChallenge("old")!;
     this.currentStep.set(elem.id);
     this.timerService.startTimer(() => this.handleTimeUp());
+  }
+
+  async getGoodChallenge() : Promise<Challenge> {
+    let challenges = this.storageHelpers.getChallenge("old");
+    if (challenges.length >= 5) {
+      return challenges[challenges.length - 1];
+    }
+    return await this.challengeService.getRandomChallenge()
   }
 
   handleTimeUp(): void {

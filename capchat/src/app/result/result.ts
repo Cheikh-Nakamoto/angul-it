@@ -521,40 +521,165 @@ ${badgeEmojis ? `🎖️ Badges: ${badgeEmojis}` : ''}
   }
 
   /**
-   * Alternative avec téléchargement PDF (optionnel)
-   * Nécessite l'installation de jsPDF: npm install jspdf
-   */
+ * Téléchargement PDF complet avec gestion d'erreurs
+ * Nécessite: npm install jspdf
+ */
   downloadPDFReport(): void {
-    // Décommentez si vous voulez utiliser jsPDF
+    try {
+      // Import dynamique de jsPDF
+      import('jspdf').then(({ jsPDF }) => {
+        const doc = new jsPDF();
+        const reportData = this.generateReportData();
 
-    import('jspdf').then(({ jsPDF }) => {
-      const doc = new jsPDF();
-      const reportData = this.generateReportData();
+        // Configuration du PDF
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Rapport de Test CAPTCHA', 20, 20);
 
-      // Configuration du PDF
-      doc.setFontSize(20);
-      doc.text('Rapport de Test CAPTCHA', 20, 20);
+        // Ligne de séparation
+        doc.setLineWidth(0.5);
+        doc.line(20, 30, 190, 30);
 
-      doc.setFontSize(12);
-      let yPosition = 40;
+        // Réinitialiser la police
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(12);
+        let yPosition = 45;
 
-      // Ajouter les statistiques
-      doc.text(`Date: ${reportData.date}`, 20, yPosition);
-      yPosition += 10;
-      doc.text(`Score global: ${reportData.globalStats.globalScore}%`, 20, yPosition);
-      yPosition += 10;
-      doc.text(`Temps total: ${reportData.globalStats.totalTime}`, 20, yPosition);
-      yPosition += 10;
-      doc.text(`Défis réussis: ${reportData.globalStats.successfulChallenges}/${reportData.globalStats.totalChallenges}`, 20, yPosition);
+        // INFORMATIONS GÉNÉRALES
+        doc.setFont('helvetica', 'bold');
+        doc.text('INFORMATIONS GÉNÉRALES', 20, yPosition);
+        yPosition += 10;
 
-      // Ajouter plus de contenu...
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Date: ${reportData.date}`, 20, yPosition);
+        yPosition += 8;
+        doc.text(`Heure: ${reportData.time}`, 20, yPosition);
+        yPosition += 8;
+        doc.text(`Classement: ${this.userRankingText}`, 20, yPosition);
+        yPosition += 15;
 
-      // Télécharger le PDF
-      doc.save(`rapport_captcha_${reportData.date}.pdf`);
-    });
+        // STATISTIQUES GLOBALES
+        doc.setFont('helvetica', 'bold');
+        doc.text('STATISTIQUES GLOBALES', 20, yPosition);
+        yPosition += 10;
 
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Score global: ${reportData.globalStats.globalScore}%`, 20, yPosition);
+        yPosition += 8;
+        doc.text(`Temps total: ${reportData.globalStats.totalTime}`, 20, yPosition);
+        yPosition += 8;
+        doc.text(`Défis réussis: ${reportData.globalStats.successfulChallenges}/${reportData.globalStats.totalChallenges}`, 20, yPosition);
+        yPosition += 8;
+        doc.text(`Série parfaite: ${reportData.globalStats.perfectStreak}`, 20, yPosition);
+        yPosition += 15;
+
+        // DÉTAIL DES DÉFIS
+        doc.setFont('helvetica', 'bold');
+        doc.text('DÉTAIL DES DÉFIS', 20, yPosition);
+        yPosition += 10;
+
+        doc.setFont('helvetica', 'normal');
+        reportData.challengeResults.forEach((result: any, index: number) => {
+          // Vérifier si on a besoin d'une nouvelle page
+          if (yPosition > 250) {
+            doc.addPage();
+            yPosition = 20;
+          }
+
+          doc.setFont('helvetica', 'bold');
+          doc.text(`Défi ${index + 1}: ${this.getChallengeTypeName(result.challenge.type)}`, 20, yPosition);
+          yPosition += 8;
+
+          doc.setFont('helvetica', 'normal');
+          doc.text(`  Résultat: ${result.isSuccess ? 'Réussi' : 'Échoué'}`, 25, yPosition);
+          yPosition += 6;
+          doc.text(`  Score: ${Math.round(result.score)}%`, 25, yPosition);
+          yPosition += 6;
+          doc.text(`  Temps: ${this.formatTime(result.timeSpent)}`, 25, yPosition);
+          yPosition += 6;
+          doc.text(`  Tentatives: ${result.attempts}`, 25, yPosition);
+          yPosition += 12;
+        });
+
+        // BADGES OBTENUS
+        if (yPosition > 200) {
+          doc.addPage();
+          yPosition = 20;
+        }
+
+        doc.setFont('helvetica', 'bold');
+        doc.text('BADGES OBTENUS', 20, yPosition);
+        yPosition += 10;
+
+        doc.setFont('helvetica', 'normal');
+        if (reportData.badges.length > 0) {
+          reportData.badges.forEach((badge: any) => {
+            doc.text(`${badge.icon} ${badge.name}: ${badge.description}`, 20, yPosition);
+            yPosition += 8;
+          });
+        } else {
+          doc.text('Aucun badge obtenu', 20, yPosition);
+          yPosition += 8;
+        }
+        yPosition += 10;
+
+        // POINTS FORTS
+        doc.setFont('helvetica', 'bold');
+        doc.text('POINTS FORTS', 20, yPosition);
+        yPosition += 10;
+
+        doc.setFont('helvetica', 'normal');
+        reportData.strengths.forEach((strength: string) => {
+          // Gérer les textes longs
+          const splitText = doc.splitTextToSize(`• ${strength}`, 170);
+          doc.text(splitText, 20, yPosition);
+          yPosition += splitText.length * 6;
+        });
+        yPosition += 10;
+
+        // AXES D'AMÉLIORATION
+        if (yPosition > 230) {
+          doc.addPage();
+          yPosition = 20;
+        }
+
+        doc.setFont('helvetica', 'bold');
+        doc.text('AXES D\'AMÉLIORATION', 20, yPosition);
+        yPosition += 10;
+
+        doc.setFont('helvetica', 'normal');
+        reportData.improvements.forEach((improvement: string) => {
+          const splitText = doc.splitTextToSize(`• ${improvement}`, 170);
+          doc.text(splitText, 20, yPosition);
+          yPosition += splitText.length * 6;
+        });
+
+        // Footer
+        const pageCount = doc.internal.pages.length - 1;
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i);
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'italic');
+          doc.text(`Page ${i} sur ${pageCount}`, 20, 280);
+          doc.text(`Généré le ${reportData.date} à ${reportData.time}`, 120, 280);
+        }
+
+        // Télécharger le PDF avec nom formaté
+        const fileName = `rapport_captcha_${reportData.date.replace(/\//g, '-')}.pdf`;
+        doc.save(fileName);
+
+        console.log('Rapport PDF téléchargé avec succès');
+      }).catch((error) => {
+        console.error('Erreur lors du chargement de jsPDF:', error);
+        // Fallback vers le téléchargement texte
+        this.downloadReport();
+      });
+    } catch (error) {
+      console.error('Erreur lors de la génération du PDF:', error);
+      // Fallback vers le téléchargement texte
+      this.downloadReport();
+    }
   }
-
   retryChallenge(): void {
     // Nettoyer le localStorage et rediriger
     this.storageHelpers.clearStorage();
