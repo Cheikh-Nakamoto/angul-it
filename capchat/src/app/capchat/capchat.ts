@@ -119,8 +119,8 @@ export class Capchat implements OnInit, OnDestroy {
     this.selectedAnswer.set(null);
     this.isCorrect.set(null);
 
-    if (await this.challengeHelpers.getNextChallengeId()  >= this.totalSteps()+1) {
-      console.log('All challenges completed', await this.challengeHelpers.getNextChallengeId(),this.totalSteps());
+    if (await this.challengeHelpers.getNextChallengeId() >= this.totalSteps() + 1) {
+      console.log('All challenges completed', await this.challengeHelpers.getNextChallengeId(), this.totalSteps());
       this.dataService.CaptchaComplet();
       this.router.navigateByUrl("result")
     }
@@ -149,12 +149,13 @@ export class Capchat implements OnInit, OnDestroy {
     let targetChallengeId = this.currentStep();
     this.cleanupSelectionsWithHelpers()
     console.log('home page back', this.currentStep())
-    if (targetChallengeId - 1 <= 0) {
-      this.router.navigateByUrl('');
-      return;
-    }
+
 
     if (direction === -1) {
+      if (targetChallengeId - 1 <= 0) {
+        this.router.navigateByUrl('');
+        return;
+      }
       targetChallengeId = Math.max(1, targetChallengeId - 1); // Go back, but not below 1
     } else { // direction === 1
       // Go forward, but not beyond the last completed challenge in challengesList
