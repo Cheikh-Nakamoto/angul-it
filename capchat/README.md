@@ -25,9 +25,8 @@ The application is structured into several Angular components, services, and uti
 
 To set up and run this project locally, follow these steps:
 
-1.  **Clone the repository:**
+1.  **Navigate to the `capchat` directory:**
     ```bash
-    git clone [repository-url]
     cd capchat
     ```
 
@@ -57,8 +56,8 @@ This project adheres to standard Angular and TypeScript best practices.
 
 ## Contributing
 
-(Add guidelines for contributing if applicable)
+Contributions are welcome! Please ensure your code adheres to the existing style and practices. For major changes, please open an issue first to discuss what you would like to change.
 
 ## License
 
-(Specify license information)
+This project is licensed under the MIT License. See the `LICENSE` file for details.

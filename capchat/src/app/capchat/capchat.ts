@@ -75,7 +75,7 @@ export class Capchat implements OnInit, OnDestroy {
     this.timerService.startTimer(() => this.handleTimeUp());
   }
 
-  async getGoodChallenge() : Promise<Challenge> {
+  async getGoodChallenge(): Promise<Challenge> {
     let challenges = this.storageHelpers.getChallenge("old");
     if (challenges.length >= 5) {
       return challenges[challenges.length - 1];
@@ -119,7 +119,8 @@ export class Capchat implements OnInit, OnDestroy {
     this.selectedAnswer.set(null);
     this.isCorrect.set(null);
 
-    if (await this.challengeHelpers.getNextChallengeId() >= this.totalSteps()) {
+    if (await this.challengeHelpers.getNextChallengeId()  >= this.totalSteps()+1) {
+      console.log('All challenges completed', await this.challengeHelpers.getNextChallengeId(),this.totalSteps());
       this.dataService.CaptchaComplet();
       this.router.navigateByUrl("result")
     }
@@ -147,17 +148,18 @@ export class Capchat implements OnInit, OnDestroy {
     // Calculate the target challenge ID (1-based)
     let targetChallengeId = this.currentStep();
     this.cleanupSelectionsWithHelpers()
+    console.log('home page back', this.currentStep())
+    if (targetChallengeId - 1 <= 0) {
+      this.router.navigateByUrl('');
+      return;
+    }
+
     if (direction === -1) {
       targetChallengeId = Math.max(1, targetChallengeId - 1); // Go back, but not below 1
     } else { // direction === 1
       // Go forward, but not beyond the last completed challenge in challengesList
       // The challengesList contains challenges from ID 1 to (challengesList.length)
       targetChallengeId = Math.min(this.challengesList.length, targetChallengeId + 1);
-    }
-    console.log('home page back')
-    if (targetChallengeId - 1 < 0) {
-      this.router.navigateByUrl('');
-      return;
     }
 
     // If the targetChallengeId is the same as the current one, or out of valid range, do nothing
