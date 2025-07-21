@@ -119,7 +119,7 @@ export class Capchat implements OnInit, OnDestroy {
     this.selectedAnswer.set(null);
     this.isCorrect.set(null);
 
-    if (await this.challengeHelpers.getNextChallengeId() >= this.totalSteps() + 1) {
+    if (this.challengesList.length + 1 >= this.totalSteps()) {
       console.log('All challenges completed', await this.challengeHelpers.getNextChallengeId(), this.totalSteps());
       this.dataService.CaptchaComplet();
       this.router.navigateByUrl("result")
@@ -162,7 +162,7 @@ export class Capchat implements OnInit, OnDestroy {
       // The challengesList contains challenges from ID 1 to (challengesList.length)
       targetChallengeId = Math.min(this.challengesList.length, targetChallengeId + 1);
     }
-
+    console.log('targetChallengeId', targetChallengeId, this.currentStep())
     // If the targetChallengeId is the same as the current one, or out of valid range, do nothing
     // The valid range for targetChallengeId is 1 to challengesList.length
     if (targetChallengeId > this.challengesList.length || targetChallengeId === this.currentStep()) {
